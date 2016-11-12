@@ -19,18 +19,13 @@ import com.dnbitstudio.londoncycles.utils.Utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.FrameLayout;
 import android.widget.Toast;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -39,9 +34,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
     private final String TAG = MapActivity.class.getSimpleName();
-    public boolean restored = false;
-    @BindView(R.id.map)
-    FrameLayout mMapFrame;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -57,7 +49,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        ButterKnife.bind(this);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -65,7 +56,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mapFragment.getMapAsync(this);
 
         if (savedInstanceState != null) {
-            restored = true;
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_POSITION);
             mLatLng = savedInstanceState.getParcelable(MARKER_LAT_LONG);
         }
@@ -111,7 +101,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (!Utils.isNetworkConnected(this)) {
             Toast.makeText(getApplicationContext(), R.string.network_unavailable,
                     Toast.LENGTH_SHORT).show();
-            mMapFrame.setBackgroundColor(Color.BLACK);
         } else {
             Log.d(TAG, "Location services connected");
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -121,7 +110,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             } else {
                 // use the location
-                handleNewLocation(location);
+                setLatLong(location);
+                handleNewLocation();
             }
         }
     }
@@ -139,7 +129,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 connectionResult.startResolutionForResult(this,
                         CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (IntentSender.SendIntentException e) {
-                e.printStackTrace();
+                Log.d(TAG, "Connection Failed " + e.getMessage());
             }
         } else {
             Log.d(TAG, "Location services connection failed with code " +
@@ -150,33 +140,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "location changed");
-        handleNewLocation(location);
+        setLatLong(location);
+        handleNewLocation();
     }
 
-    private void handleNewLocation(Location location) {
-        Log.d(TAG, location.toString());
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
+    private void setLatLong(Location location) {
+        mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+    }
 
-        // Listener to check weather on different location
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                restored = false;
-                mLatLng = latLng;
-                setUpMap(latLng);
-            }
-        });
+    private void handleNewLocation() {
+        setUpMap();
 
-        // Set up map and move camera to the right position
-        LatLng latLng = new LatLng(latitude, longitude);
-        setUpMap(latLng);
-
-        // Use camera position before rotation if any. Otherwise get the new one.
-        if (mCameraPosition != null) {
+        if (mCameraPosition == null) {
+            mCameraPosition = new CameraPosition.Builder()
+                    .target(mLatLng)
+                    .zoom(15)
+                    .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
 
@@ -189,22 +169,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .build();
     }
 
-    private void setUpMap(LatLng latLng) {
+    private void setUpMap() {
         mMap.clear();
-
-        if (mLatLng != null) {
-            latLng = mLatLng;
-        }
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+        MarkerOptions markerOptions = new MarkerOptions().position(mLatLng);
         mMap.addMarker(markerOptions);
-
-        if (!restored) {
-            if (!Utils.isNetworkConnected(getApplicationContext())) {
-                Toast.makeText(getApplicationContext(), R.string.network_unavailable,
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                restored = false;
-            }
-        }
     }
 }
