@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.0"
+
+    dexOptions {
+        maxProcessCount 2
+        javaMaxHeapSize "2g"
+    }
+
     defaultConfig {
         applicationId "com.dnbitstudio.londoncycles"
         minSdkVersion 16
