@@ -1,4 +1,4 @@
-package com.dnbitstudio.londoncycles.ui;
+package com.dnbitstudio.londoncycles.ui.map;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;

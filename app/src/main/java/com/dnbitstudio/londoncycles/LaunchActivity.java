@@ -1,6 +1,6 @@
 package com.dnbitstudio.londoncycles;
 
-import com.dnbitstudio.londoncycles.ui.MapActivity;
+import com.dnbitstudio.londoncycles.ui.map.MapActivity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
