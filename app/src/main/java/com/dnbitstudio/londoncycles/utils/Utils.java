@@ -7,6 +7,10 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class Utils {
     public static boolean isNetworkConnected(Context context) {
@@ -43,5 +47,21 @@ public class Utils {
                 });
         final AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public static String loadJSONFromAsset(Context context, String fileName) {
+        String json;
+        try {
+            InputStream is = context.getAssets().open(fileName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            Log.d("loadJSONFromAsset", ex.getMessage());
+            return null;
+        }
+        return json;
     }
 }

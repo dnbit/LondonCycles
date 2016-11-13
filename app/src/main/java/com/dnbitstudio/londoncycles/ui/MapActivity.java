@@ -13,7 +13,10 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
+import com.dnbitstudio.londoncycles.model.BikePoint;
+import com.dnbitstudio.londoncycles.model.TflService;
 import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.content.Context;
@@ -26,6 +29,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -157,6 +166,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .zoom(15)
                     .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+            callApi();
         }
     }
 
@@ -173,5 +183,36 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mMap.clear();
         MarkerOptions markerOptions = new MarkerOptions().position(mLatLng);
         mMap.addMarker(markerOptions);
+    }
+
+    private void callApi() {
+        String mockedJson = "";
+        if (BuildConfig.DEBUG) {
+            mockedJson = Utils.loadJSONFromAsset(this, "mokedBikePoints.json");
+        }
+
+        TflService tflService = new TflService(mockedJson);
+
+        tflService.loadBikePoints(new Callback<List<BikePoint>>() {
+            @Override
+            public void onResponse(Call<List<BikePoint>> call, Response<List<BikePoint>> response) {
+                Log.d(TAG, "onResponse");
+                List<BikePoint> bikePoints = response.body();
+                putMarkersInMap(bikePoints);
+            }
+
+            @Override
+            public void onFailure(Call<List<BikePoint>> call, Throwable t) {
+                Log.d(TAG, "onFailure");
+            }
+        });
+    }
+
+    private void putMarkersInMap(List<BikePoint> bikePoints) {
+        for (BikePoint bikepoint : bikePoints) {
+            LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
+            MarkerOptions markerOptions = new MarkerOptions().position(latLong);
+            mMap.addMarker(markerOptions);
+        }
     }
 }
