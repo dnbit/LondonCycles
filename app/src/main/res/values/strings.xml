@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">London Cycles</string>
+    <string name="title_activity_map">Map</string>
+    <string name="network_unavailable">Network unavailable</string>
 </resources>
