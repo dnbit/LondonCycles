@@ -33,7 +33,8 @@
         </activity>
         <activity
                 android:name=".ui.map.MapActivity"
-                android:label="@string/title_activity_map">
+                android:label="@string/title_activity_map"
+                android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
                 android:name=".ui.list.BikePointListActivity"
