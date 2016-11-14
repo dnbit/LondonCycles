@@ -40,6 +40,10 @@ public class TflService {
         mTflApi.loadBikePoints().enqueue(callback);
     }
 
+//    public void loadBikePointDetails(String bikePointId, Callback<BikePoint> callback) {
+//        mTflApi.loadBikePointDetails(bikePointId).enqueue(callback);
+//    }
+
     private Retrofit.Builder createDebugMockedRetrofitBuilder(String mockedJson) {
         MockedInterceptor mockedInterceptor = new MockedInterceptor(mockedJson);
         final OkHttpClient client = new OkHttpClient()

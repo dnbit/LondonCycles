@@ -102,7 +102,7 @@ public class BikePointListActivity extends AppCompatActivity {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
                         arguments.putString(BikePointDetailFragment.ARG_ITEM_ID,
-                                holder.mItem.getId().substring(holder.mItem.getId().length() - 1));
+                                holder.mItem.getId());
                         BikePointDetailFragment fragment = new BikePointDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()

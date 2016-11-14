@@ -20,6 +20,8 @@ import android.view.View;
  */
 public class BikePointDetailActivity extends AppCompatActivity {
 
+    private final String TAG = BikePointDetailActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,8 +57,8 @@ public class BikePointDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(BikePointDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(BikePointDetailFragment.ARG_ITEM_ID));
+            String bikePointId = getIntent().getStringExtra(BikePointDetailFragment.ARG_ITEM_ID);
+            arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
             BikePointDetailFragment fragment = new BikePointDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
