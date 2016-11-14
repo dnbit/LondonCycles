@@ -31,13 +31,23 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.google.android.gms:play-services:9.8.0'
-    compile 'javax.annotation:javax.annotation-api:1.2'
+    ext {
+        supportLibVersion = '25.0.0'
+        playServicesVersion = '9.8.0'
+        retrofitVersion = '2.1.0'
+        butterknifeVersion = '8.4.0'
+    }
 
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+    compile "com.android.support:design:${supportLibVersion}"
+    compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    compile "com.jakewharton:butterknife:${butterknifeVersion}"
+    compile "com.google.android.gms:play-services-location:${playServicesVersion}"
+    compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
+    compile 'javax.annotation:javax.annotation-api:1.2'
     testCompile 'junit:junit:4.12'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+    annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
 }

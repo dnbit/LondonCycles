@@ -188,7 +188,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void callApi() {
         String mockedJson = "";
         if (BuildConfig.DEBUG) {
-            mockedJson = Utils.loadJSONFromAsset(this, "mokedBikePoints.json");
+            mockedJson = Utils.loadMockedBikePoints(this);
         }
 
         TflService tflService = new TflService(mockedJson);

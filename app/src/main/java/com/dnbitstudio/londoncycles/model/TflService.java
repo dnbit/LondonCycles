@@ -12,7 +12,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -38,8 +37,7 @@ public class TflService {
     }
 
     public void loadBikePoints(Callback<List<BikePoint>> callback) {
-        Call<List<BikePoint>> call = mTflApi.loadBikePoints();
-        call.enqueue(callback);
+        mTflApi.loadBikePoints().enqueue(callback);
     }
 
     private Retrofit.Builder createDebugMockedRetrofitBuilder(String mockedJson) {
