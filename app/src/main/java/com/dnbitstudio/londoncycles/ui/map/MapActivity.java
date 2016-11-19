@@ -1,4 +1,4 @@
-package com.dnbitstudio.londoncycles.ui;
+package com.dnbitstudio.londoncycles.ui.map;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,6 +17,7 @@ import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
+import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.content.Context;
@@ -26,23 +27,30 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
     private final String TAG = MapActivity.class.getSimpleName();
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -58,6 +66,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        ButterKnife.bind(this);
+
+        setSupportActionBar(mToolbar);
+        mToolbar.setTitle(getTitle());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -97,6 +109,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onSaveInstanceState(outState);
         outState.putParcelable(CAMERA_POSITION, mMap.getCameraPosition());
         outState.putParcelable(MARKER_LAT_LONG, mLatLng);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_map, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_list) {
+            BikePointListActivity.launchActivity(this);
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -188,7 +220,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void callApi() {
         String mockedJson = "";
         if (BuildConfig.DEBUG) {
-            mockedJson = Utils.loadJSONFromAsset(this, "mokedBikePoints.json");
+            mockedJson = Utils.loadMockedBikePoints(this);
         }
 
         TflService tflService = new TflService(mockedJson);

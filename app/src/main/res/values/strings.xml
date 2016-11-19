@@ -2,4 +2,8 @@
     <string name="app_name">London Cycles</string>
     <string name="title_activity_map">Map</string>
     <string name="network_unavailable">Network unavailable</string>
+    <string name="title_bikepoint_list">BikePoints</string>
+    <string name="title_bikepoint_detail">BikePoint Detail</string>
+    <string name="map">Map</string>
+    <string name="list">List</string>
 </resources>

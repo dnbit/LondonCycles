@@ -49,7 +49,11 @@ public class Utils {
         alert.show();
     }
 
-    public static String loadJSONFromAsset(Context context, String fileName) {
+    public static String loadMockedBikePoints(Context context) {
+        return loadJSONFromAsset(context, "mokedBikePoints.json");
+    }
+
+    private static String loadJSONFromAsset(Context context, String fileName) {
         String json;
         try {
             InputStream is = context.getAssets().open(fileName);
