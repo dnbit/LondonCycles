@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import butterknife.ButterKnife;
+
 /**
  * A fragment representing a single BikePoint detail screen.
  * This fragment is either contained in a {@link BikePointListActivity}
@@ -59,6 +61,7 @@ public class BikePointDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.bikepoint_detail, container, false);
+        ButterKnife.bind(this, rootView);
 
         // Show the dummy content as text in a TextView.
         if (mItem != null) {

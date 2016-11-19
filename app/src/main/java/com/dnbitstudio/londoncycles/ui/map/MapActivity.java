@@ -36,6 +36,8 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,6 +49,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
     private final String TAG = MapActivity.class.getSimpleName();
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -62,10 +66,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
+        setSupportActionBar(mToolbar);
+        mToolbar.setTitle(getTitle());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
