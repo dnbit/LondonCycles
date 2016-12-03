@@ -59,6 +59,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
+    private static final String BIKE_POINT_PARSE_ID = "id";
+    private static final String BIKE_POINT_PARSE_NAME = "commonName";
+    private static final String BIKE_POINT_PARSE_LAT = "lat";
+    private static final String BIKE_POINT_PARSE_LON = "lon";
+    private static final String BIKE_POINT_PARSE_ADDITIONAL_PROPERTIES = "additionalProperties";
+    private static final String BIKE_POINT_PARSE_KEY = "key";
+    private static final String BIKE_POINT_PARSE_VALUE = "value";
     private final String TAG = MapActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -68,6 +75,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private LatLng mLatLng;
     private CameraPosition mCameraPosition;
     private List<BikePoint> mBikePoints;
+    private BikePoint mBikePoint;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -243,41 +251,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Log.d(TAG, "onResponse");
                 mBikePoints = new ArrayList<>();
 
-                JsonArray BikePointJsonArray = response.body();
-                for (JsonElement bikePointElement : BikePointJsonArray) {
-                    JsonObject bikePointJsonObject = bikePointElement.getAsJsonObject();
+                JsonArray bikePointJsonArray = response.body();
+                parseBikePointJsonArray(bikePointJsonArray);
 
-                    String id = bikePointJsonObject.get("id").getAsString();
-                    String name = bikePointJsonObject.get("commonName").getAsString();
-                    double lat = bikePointJsonObject.get("lat").getAsDouble();
-                    double lon = bikePointJsonObject.get("lon").getAsDouble();
-                    int docks = 0;
-                    int empty = 0;
-                    int bikes = 0;
-
-                    JsonArray additionalPropertiesJsonArray
-                            = bikePointJsonObject.getAsJsonArray("additionalProperties");
-                    for (JsonElement additionalPropertyElement : additionalPropertiesJsonArray) {
-                        JsonObject additionalPropertyJsonObject
-                                = additionalPropertyElement.getAsJsonObject();
-
-                        String key = additionalPropertyJsonObject.get("key").getAsString();
-                        switch (key) {
-                            case "NbBikes":
-                                bikes = additionalPropertyJsonObject.get("value").getAsInt();
-                                break;
-                            case "NbDocks":
-                                docks = additionalPropertyJsonObject.get("value").getAsInt();
-                                break;
-                            case "NbEmptyDocks":
-                                empty = additionalPropertyJsonObject.get("value").getAsInt();
-                                break;
-                        }
-                    }
-
-                    mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
-                }
-//                mBikePoints = response.body();
                 putMarkersInMap();
                 saveBikePointsToDatabase();
             }
@@ -287,6 +263,46 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Log.d(TAG, "onFailure" + t.getMessage());
             }
         });
+    }
+
+    private void parseBikePointJsonArray(JsonArray bikePointJsonArray) {
+        for (JsonElement bikePointElement : bikePointJsonArray) {
+            mBikePoint = new BikePoint();
+            JsonObject bikePointJsonObject = bikePointElement.getAsJsonObject();
+
+            mBikePoint.setId(bikePointJsonObject.get(BIKE_POINT_PARSE_ID).getAsString());
+            mBikePoint.setName(bikePointJsonObject.get(BIKE_POINT_PARSE_NAME).getAsString());
+            mBikePoint.setLat(bikePointJsonObject.get(BIKE_POINT_PARSE_LAT).getAsDouble());
+            mBikePoint.setLon(bikePointJsonObject.get(BIKE_POINT_PARSE_LON).getAsDouble());
+
+            JsonArray additionalPropertiesJsonArray
+                    = bikePointJsonObject.getAsJsonArray(BIKE_POINT_PARSE_ADDITIONAL_PROPERTIES);
+            parseAdditionalPropertiesJsonArray(additionalPropertiesJsonArray);
+            mBikePoints.add(mBikePoint);
+        }
+    }
+
+    private void parseAdditionalPropertiesJsonArray(JsonArray additionalPropertiesJsonArray) {
+        for (JsonElement additionalPropertyElement : additionalPropertiesJsonArray) {
+            JsonObject additionalPropertyJsonObject
+                    = additionalPropertyElement.getAsJsonObject();
+
+            String key = additionalPropertyJsonObject.get(BIKE_POINT_PARSE_KEY).getAsString();
+            switch (key) {
+                case "NbBikes":
+                    mBikePoint.setBikes(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+                case "NbDocks":
+                    mBikePoint.setDocks(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+                case "NbEmptyDocks":
+                    mBikePoint.setEmpty(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+            }
+        }
     }
 
     private void putMarkersInMap() {
@@ -304,8 +320,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             values = new ContentValues(1);
             values.put(BikePointProvider.COL_BIKE_POINT_ID, bikePoint.getId());
             values.put(BikePointProvider.COL_BIKE_POINT_NAME, bikePoint.getName());
-            values.put(BikePointProvider.COL_BIKE_POINT_LATITUDE, bikePoint.getLat());
-            values.put(BikePointProvider.COL_BIKE_POINT_LONGITUDE, bikePoint.getLon());
+            values.put(BikePointProvider.COL_BIKE_POINT_LAT, bikePoint.getLat());
+            values.put(BikePointProvider.COL_BIKE_POINT_LON, bikePoint.getLon());
             values.put(BikePointProvider.COL_BIKE_POINT_DOCKS, bikePoint.getDocks());
             values.put(BikePointProvider.COL_BIKE_POINT_EMPTY, bikePoint.getEmpty());
             values.put(BikePointProvider.COL_BIKE_POINT_BIKES, bikePoint.getBikes());
@@ -335,22 +351,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             Log.d(TAG, "Table is empty");
                         }
 
-                        do {
-                            String id = cursor.getString(cursor.getColumnIndex("id"));
-                            String name = cursor.getString(cursor.getColumnIndex("name"));
-                            double latitude = cursor.getDouble(cursor.getColumnIndex("latitude"));
-                            double longitude = cursor.getDouble(cursor.getColumnIndex("longitude"));
-                            int docks = cursor.getInt(cursor.getColumnIndex("docks"));
-                            int empty = cursor.getInt(cursor.getColumnIndex("empty"));
-                            int bikes = cursor.getInt(cursor.getColumnIndex("bikes"));
+                        mBikePoints = new ArrayList<>();
 
-                            Log.d(TAG, "Found id: " + id);
-                            Log.d(TAG, "Found name: " + name);
-                            Log.d(TAG, "Found latitude: " + latitude);
-                            Log.d(TAG, "Found longitude: " + longitude);
-                            Log.d(TAG, "Found docks: " + docks);
-                            Log.d(TAG, "Found empty: " + empty);
-                            Log.d(TAG, "Found bikes: " + bikes);
+                        do {
+                            String id = cursor.getString(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
+                            String name = cursor.getString(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
+                            double lat = cursor.getDouble(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
+                            double lon = cursor.getDouble(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
+                            int docks = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
+                            int empty = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
+                            int bikes = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
+
+                            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
                         } while (cursor.moveToNext());
                     }
 

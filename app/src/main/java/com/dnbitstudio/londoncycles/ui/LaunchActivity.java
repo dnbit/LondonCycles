@@ -12,9 +12,6 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         BikePointListActivity.launchActivity(this);
 
-//        Intent intent = new Intent(this, MainActivity.class);
-//        startActivity(intent);
-
         finish();
     }
 }

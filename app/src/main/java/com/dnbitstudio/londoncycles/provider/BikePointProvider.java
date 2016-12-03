@@ -8,8 +8,8 @@ public class BikePointProvider extends SQLiteContentProviderImpl {
 
     public static final String COL_BIKE_POINT_ID = "id";
     public static final String COL_BIKE_POINT_NAME = "name";
-    public static final String COL_BIKE_POINT_LATITUDE = "latitude";
-    public static final String COL_BIKE_POINT_LONGITUDE = "longitude";
+    public static final String COL_BIKE_POINT_LAT = "lat";
+    public static final String COL_BIKE_POINT_LON = "lon";
     public static final String COL_BIKE_POINT_DOCKS = "docks";
     public static final String COL_BIKE_POINT_EMPTY = "empty";
     public static final String COL_BIKE_POINT_BIKES = "bikes";

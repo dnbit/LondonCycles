@@ -11,6 +11,9 @@ public class BikePoint {
     private int empty;
     private int bikes;
 
+    public BikePoint() {
+    }
+
     public BikePoint(String id, String name, double lat, double lon, int docks, int empty, int bikes) {
         this.id = id;
         this.name = name;
