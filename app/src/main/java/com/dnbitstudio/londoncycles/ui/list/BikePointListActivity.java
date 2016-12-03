@@ -108,7 +108,7 @@ public class BikePointListActivity extends AppCompatActivity {
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mBikePoints.get(position);
             holder.mIdView.setText(mBikePoints.get(position).getId());
-            holder.mContentView.setText(mBikePoints.get(position).getCommonName());
+            holder.mContentView.setText(mBikePoints.get(position).getName());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override

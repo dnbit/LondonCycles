@@ -1,179 +1,79 @@
 
 package com.dnbitstudio.londoncycles.model;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Generated;
-
-@Generated("org.jsonschema2pojo")
 public class BikePoint {
 
-    @SerializedName("$type")
-    @Expose
-    private String $type;
-    @SerializedName("id")
-    @Expose
     private String id;
-    @SerializedName("url")
-    @Expose
-    private String url;
-    @SerializedName("commonName")
-    @Expose
-    private String commonName;
-    @SerializedName("placeType")
-    @Expose
-    private String placeType;
-    @SerializedName("additionalProperties")
-    @Expose
-    private List<AdditionalProperty> additionalProperties = new ArrayList<AdditionalProperty>();
-    @SerializedName("lat")
-    @Expose
+    private String name;
     private double lat;
-    @SerializedName("lon")
-    @Expose
     private double lon;
+    private int docks;
+    private int empty;
+    private int bikes;
 
-    /**
-     * No args constructor for use in serialization
-     */
-    public BikePoint() {
-    }
-
-    /**
-     *
-     * @param id
-     * @param commonName
-     * @param lon
-     * @param additionalProperties
-     * @param $type
-     * @param placeType
-     * @param lat
-     * @param url
-     */
-    public BikePoint(String $type, String id, String url, String commonName, String placeType, List<AdditionalProperty> additionalProperties, double lat, double lon) {
-        this.$type = $type;
+    public BikePoint(String id, String name, double lat, double lon, int docks, int empty, int bikes) {
         this.id = id;
-        this.url = url;
-        this.commonName = commonName;
-        this.placeType = placeType;
-        this.additionalProperties = additionalProperties;
+        this.name = name;
         this.lat = lat;
         this.lon = lon;
+        this.docks = docks;
+        this.empty = empty;
+        this.bikes = bikes;
     }
 
-    /**
-     * @return The $type
-     */
-    public String get$type() {
-        return $type;
-    }
-
-    /**
-     * @param $type The $type
-     */
-    public void set$type(String $type) {
-        this.$type = $type;
-    }
-
-    /**
-     * @return The id
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id The id
-     */
     public void setId(String id) {
         this.id = id;
     }
 
-    /**
-     * @return The url
-     */
-    public String getUrl() {
-        return url;
+    public String getName() {
+        return name;
     }
 
-    /**
-     * @param url The url
-     */
-    public void setUrl(String url) {
-        this.url = url;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    /**
-     * @return The commonName
-     */
-    public String getCommonName() {
-        return commonName;
-    }
-
-    /**
-     * @param commonName The commonName
-     */
-    public void setCommonName(String commonName) {
-        this.commonName = commonName;
-    }
-
-    /**
-     * @return The placeType
-     */
-    public String getPlaceType() {
-        return placeType;
-    }
-
-    /**
-     * @param placeType The placeType
-     */
-    public void setPlaceType(String placeType) {
-        this.placeType = placeType;
-    }
-
-    /**
-     * @return The additionalProperties
-     */
-    public List<AdditionalProperty> getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    /**
-     * @param additionalProperties The additionalProperties
-     */
-    public void setAdditionalProperties(List<AdditionalProperty> additionalProperties) {
-        this.additionalProperties = additionalProperties;
-    }
-
-    /**
-     * @return The lat
-     */
     public double getLat() {
         return lat;
     }
 
-    /**
-     * @param lat The lat
-     */
     public void setLat(double lat) {
         this.lat = lat;
     }
 
-    /**
-     * @return The lon
-     */
     public double getLon() {
         return lon;
     }
 
-    /**
-     * @param lon The lon
-     */
     public void setLon(double lon) {
         this.lon = lon;
+    }
+
+    public int getDocks() {
+        return docks;
+    }
+
+    public void setDocks(int docks) {
+        this.docks = docks;
+    }
+
+    public int getEmpty() {
+        return empty;
+    }
+
+    public void setEmpty(int empty) {
+        this.empty = empty;
+    }
+
+    public int getBikes() {
+        return bikes;
+    }
+
+    public void setBikes(int bikes) {
+        this.bikes = bikes;
     }
 }

@@ -12,10 +12,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
-import com.dnbitstudio.londoncycles.model.AdditionalProperty;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
@@ -235,18 +237,54 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         TflService tflService = new TflService(mockedJson);
 
-        tflService.loadBikePoints(new Callback<List<BikePoint>>() {
+        tflService.loadBikePoints(new Callback<JsonArray>() {
             @Override
-            public void onResponse(Call<List<BikePoint>> call, Response<List<BikePoint>> response) {
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
                 Log.d(TAG, "onResponse");
-                mBikePoints = response.body();
+                mBikePoints = new ArrayList<>();
+
+                JsonArray BikePointJsonArray = response.body();
+                for (JsonElement bikePointElement : BikePointJsonArray) {
+                    JsonObject bikePointJsonObject = bikePointElement.getAsJsonObject();
+
+                    String id = bikePointJsonObject.get("id").getAsString();
+                    String name = bikePointJsonObject.get("commonName").getAsString();
+                    double lat = bikePointJsonObject.get("lat").getAsDouble();
+                    double lon = bikePointJsonObject.get("lon").getAsDouble();
+                    int docks = 0;
+                    int empty = 0;
+                    int bikes = 0;
+
+                    JsonArray additionalPropertiesJsonArray
+                            = bikePointJsonObject.getAsJsonArray("additionalProperties");
+                    for (JsonElement additionalPropertyElement : additionalPropertiesJsonArray) {
+                        JsonObject additionalPropertyJsonObject
+                                = additionalPropertyElement.getAsJsonObject();
+
+                        String key = additionalPropertyJsonObject.get("key").getAsString();
+                        switch (key) {
+                            case "NbBikes":
+                                bikes = additionalPropertyJsonObject.get("value").getAsInt();
+                                break;
+                            case "NbDocks":
+                                docks = additionalPropertyJsonObject.get("value").getAsInt();
+                                break;
+                            case "NbEmptyDocks":
+                                empty = additionalPropertyJsonObject.get("value").getAsInt();
+                                break;
+                        }
+                    }
+
+                    mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
+                }
+//                mBikePoints = response.body();
                 putMarkersInMap();
                 saveBikePointsToDatabase();
             }
 
             @Override
-            public void onFailure(Call<List<BikePoint>> call, Throwable t) {
-                Log.d(TAG, "onFailure");
+            public void onFailure(Call<JsonArray> call, Throwable t) {
+                Log.d(TAG, "onFailure" + t.getMessage());
             }
         });
     }
@@ -265,27 +303,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         for (BikePoint bikePoint : mBikePoints) {
             values = new ContentValues(1);
             values.put(BikePointProvider.COL_BIKE_POINT_ID, bikePoint.getId());
-            values.put(BikePointProvider.COL_BIKE_POINT_NAME, bikePoint.getCommonName());
+            values.put(BikePointProvider.COL_BIKE_POINT_NAME, bikePoint.getName());
             values.put(BikePointProvider.COL_BIKE_POINT_LATITUDE, bikePoint.getLat());
             values.put(BikePointProvider.COL_BIKE_POINT_LONGITUDE, bikePoint.getLon());
-
-            List<AdditionalProperty> additionalProperties = bikePoint.getAdditionalProperties();
-            for (AdditionalProperty additionalProperty : additionalProperties) {
-                switch (additionalProperty.getKey()) {
-                    case "NbDocks":
-                        values.put(BikePointProvider.COL_BIKE_POINT_DOCKS,
-                                additionalProperty.getValue());
-                        break;
-                    case "NbEmptyDocks":
-                        values.put(BikePointProvider.COL_BIKE_POINT_EMPTY,
-                                additionalProperty.getValue());
-                        break;
-                    case "NbBikes":
-                        values.put(BikePointProvider.COL_BIKE_POINT_BIKES,
-                                additionalProperty.getValue());
-                        break;
-                }
-            }
+            values.put(BikePointProvider.COL_BIKE_POINT_DOCKS, bikePoint.getDocks());
+            values.put(BikePointProvider.COL_BIKE_POINT_EMPTY, bikePoint.getEmpty());
+            values.put(BikePointProvider.COL_BIKE_POINT_BIKES, bikePoint.getBikes());
 
             contentValues.add(values);
         }
