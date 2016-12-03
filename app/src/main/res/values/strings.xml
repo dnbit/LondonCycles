@@ -6,4 +6,5 @@
     <string name="title_bikepoint_detail">BikePoint Detail</string>
     <string name="map">Map</string>
     <string name="list">List</string>
+    <string name="explain_demo">See the device LogCat for the output of this demo</string>
 </resources>

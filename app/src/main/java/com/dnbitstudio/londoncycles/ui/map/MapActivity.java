@@ -15,18 +15,26 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
+import com.dnbitstudio.londoncycles.model.AdditionalProperty;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
+import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.Utils;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -34,6 +42,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -56,6 +65,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     private LatLng mLatLng;
     private CameraPosition mCameraPosition;
+    private List<BikePoint> mBikePoints;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -229,8 +239,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onResponse(Call<List<BikePoint>> call, Response<List<BikePoint>> response) {
                 Log.d(TAG, "onResponse");
-                List<BikePoint> bikePoints = response.body();
-                putMarkersInMap(bikePoints);
+                mBikePoints = response.body();
+                putMarkersInMap();
+                saveBikePointsToDatabase();
             }
 
             @Override
@@ -240,11 +251,97 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    private void putMarkersInMap(List<BikePoint> bikePoints) {
-        for (BikePoint bikepoint : bikePoints) {
+    private void putMarkersInMap() {
+        for (BikePoint bikepoint : mBikePoints) {
             LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
             MarkerOptions markerOptions = new MarkerOptions().position(latLong);
             mMap.addMarker(markerOptions);
+        }
+    }
+
+    private void saveBikePointsToDatabase() {
+        List<ContentValues> contentValues = new ArrayList<>();
+        ContentValues values;
+        for (BikePoint bikePoint : mBikePoints) {
+            values = new ContentValues(1);
+            values.put(BikePointProvider.COL_BIKE_POINT_ID, bikePoint.getId());
+            values.put(BikePointProvider.COL_BIKE_POINT_NAME, bikePoint.getCommonName());
+            values.put(BikePointProvider.COL_BIKE_POINT_LATITUDE, bikePoint.getLat());
+            values.put(BikePointProvider.COL_BIKE_POINT_LONGITUDE, bikePoint.getLon());
+
+            List<AdditionalProperty> additionalProperties = bikePoint.getAdditionalProperties();
+            for (AdditionalProperty additionalProperty : additionalProperties) {
+                switch (additionalProperty.getKey()) {
+                    case "NbDocks":
+                        values.put(BikePointProvider.COL_BIKE_POINT_DOCKS,
+                                additionalProperty.getValue());
+                        break;
+                    case "NbEmptyDocks":
+                        values.put(BikePointProvider.COL_BIKE_POINT_EMPTY,
+                                additionalProperty.getValue());
+                        break;
+                    case "NbBikes":
+                        values.put(BikePointProvider.COL_BIKE_POINT_BIKES,
+                                additionalProperty.getValue());
+                        break;
+                }
+            }
+
+            contentValues.add(values);
+        }
+
+        Uri table = BikePointProvider.BIKE_POINTS;
+        ContentValues[] bulk = new ContentValues[contentValues.size()];
+        contentValues.toArray(bulk);
+
+        getContentResolver().bulkInsert(table, bulk);
+    }
+
+    private void retrieveBikePointsFromDatabase() {
+        getSupportLoaderManager().initLoader(R.id.loader_bike_points, null,
+                new LoaderManager.LoaderCallbacks<Cursor>() {
+
+                    @Override
+                    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+                        return new BikePointCursorLoader(getApplicationContext());
+                    }
+
+                    @Override
+                    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+                        if (!cursor.moveToFirst()) {
+                            Log.d(TAG, "Table is empty");
+                        }
+
+                        do {
+                            String id = cursor.getString(cursor.getColumnIndex("id"));
+                            String name = cursor.getString(cursor.getColumnIndex("name"));
+                            double latitude = cursor.getDouble(cursor.getColumnIndex("latitude"));
+                            double longitude = cursor.getDouble(cursor.getColumnIndex("longitude"));
+                            int docks = cursor.getInt(cursor.getColumnIndex("docks"));
+                            int empty = cursor.getInt(cursor.getColumnIndex("empty"));
+                            int bikes = cursor.getInt(cursor.getColumnIndex("bikes"));
+
+                            Log.d(TAG, "Found id: " + id);
+                            Log.d(TAG, "Found name: " + name);
+                            Log.d(TAG, "Found latitude: " + latitude);
+                            Log.d(TAG, "Found longitude: " + longitude);
+                            Log.d(TAG, "Found docks: " + docks);
+                            Log.d(TAG, "Found empty: " + empty);
+                            Log.d(TAG, "Found bikes: " + bikes);
+                        } while (cursor.moveToNext());
+                    }
+
+                    @Override
+                    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+
+                    }
+                });
+    }
+
+    private static class BikePointCursorLoader extends CursorLoader {
+
+        public BikePointCursorLoader(Context context) {
+            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
         }
     }
 }
