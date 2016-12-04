@@ -50,6 +50,14 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.dnbitstudio.londoncycles.ui.list.BikePointListActivity"/>
         </activity>
+
+
+        <provider
+                android:name=".provider.BikePointProvider"
+                android:authorities="com.dnbitstudio.londoncycles"
+                android:exported="false"/>
+
+
     </application>
 
 </manifest>

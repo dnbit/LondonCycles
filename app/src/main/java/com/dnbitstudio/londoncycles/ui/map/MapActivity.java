@@ -12,21 +12,31 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
+import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.Utils;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -34,6 +44,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,6 +59,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
+    private static final String BIKE_POINT_PARSE_ID = "id";
+    private static final String BIKE_POINT_PARSE_NAME = "commonName";
+    private static final String BIKE_POINT_PARSE_LAT = "lat";
+    private static final String BIKE_POINT_PARSE_LON = "lon";
+    private static final String BIKE_POINT_PARSE_ADDITIONAL_PROPERTIES = "additionalProperties";
+    private static final String BIKE_POINT_PARSE_KEY = "key";
+    private static final String BIKE_POINT_PARSE_VALUE = "value";
     private final String TAG = MapActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -56,6 +74,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private LocationRequest mLocationRequest;
     private LatLng mLatLng;
     private CameraPosition mCameraPosition;
+    private List<BikePoint> mBikePoints;
+    private BikePoint mBikePoint;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -225,26 +245,145 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         TflService tflService = new TflService(mockedJson);
 
-        tflService.loadBikePoints(new Callback<List<BikePoint>>() {
+        tflService.loadBikePoints(new Callback<JsonArray>() {
             @Override
-            public void onResponse(Call<List<BikePoint>> call, Response<List<BikePoint>> response) {
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
                 Log.d(TAG, "onResponse");
-                List<BikePoint> bikePoints = response.body();
-                putMarkersInMap(bikePoints);
+                mBikePoints = new ArrayList<>();
+
+                JsonArray bikePointJsonArray = response.body();
+                parseBikePointJsonArray(bikePointJsonArray);
+
+                putMarkersInMap();
+                saveBikePointsToDatabase();
             }
 
             @Override
-            public void onFailure(Call<List<BikePoint>> call, Throwable t) {
-                Log.d(TAG, "onFailure");
+            public void onFailure(Call<JsonArray> call, Throwable t) {
+                Log.d(TAG, "onFailure" + t.getMessage());
             }
         });
     }
 
-    private void putMarkersInMap(List<BikePoint> bikePoints) {
-        for (BikePoint bikepoint : bikePoints) {
+    private void parseBikePointJsonArray(JsonArray bikePointJsonArray) {
+        for (JsonElement bikePointElement : bikePointJsonArray) {
+            mBikePoint = new BikePoint();
+            JsonObject bikePointJsonObject = bikePointElement.getAsJsonObject();
+
+            mBikePoint.setId(bikePointJsonObject.get(BIKE_POINT_PARSE_ID).getAsString());
+            mBikePoint.setName(bikePointJsonObject.get(BIKE_POINT_PARSE_NAME).getAsString());
+            mBikePoint.setLat(bikePointJsonObject.get(BIKE_POINT_PARSE_LAT).getAsDouble());
+            mBikePoint.setLon(bikePointJsonObject.get(BIKE_POINT_PARSE_LON).getAsDouble());
+
+            JsonArray additionalPropertiesJsonArray
+                    = bikePointJsonObject.getAsJsonArray(BIKE_POINT_PARSE_ADDITIONAL_PROPERTIES);
+            parseAdditionalPropertiesJsonArray(additionalPropertiesJsonArray);
+            mBikePoints.add(mBikePoint);
+        }
+    }
+
+    private void parseAdditionalPropertiesJsonArray(JsonArray additionalPropertiesJsonArray) {
+        for (JsonElement additionalPropertyElement : additionalPropertiesJsonArray) {
+            JsonObject additionalPropertyJsonObject
+                    = additionalPropertyElement.getAsJsonObject();
+
+            String key = additionalPropertyJsonObject.get(BIKE_POINT_PARSE_KEY).getAsString();
+            switch (key) {
+                case "NbBikes":
+                    mBikePoint.setBikes(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+                case "NbDocks":
+                    mBikePoint.setDocks(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+                case "NbEmptyDocks":
+                    mBikePoint.setEmpty(
+                            additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
+                    break;
+            }
+        }
+    }
+
+    private void putMarkersInMap() {
+        for (BikePoint bikepoint : mBikePoints) {
             LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
             MarkerOptions markerOptions = new MarkerOptions().position(latLong);
             mMap.addMarker(markerOptions);
+        }
+    }
+
+    private void saveBikePointsToDatabase() {
+        List<ContentValues> contentValues = new ArrayList<>();
+        ContentValues values;
+        for (BikePoint bikePoint : mBikePoints) {
+            values = new ContentValues(1);
+            values.put(BikePointProvider.COL_BIKE_POINT_ID, bikePoint.getId());
+            values.put(BikePointProvider.COL_BIKE_POINT_NAME, bikePoint.getName());
+            values.put(BikePointProvider.COL_BIKE_POINT_LAT, bikePoint.getLat());
+            values.put(BikePointProvider.COL_BIKE_POINT_LON, bikePoint.getLon());
+            values.put(BikePointProvider.COL_BIKE_POINT_DOCKS, bikePoint.getDocks());
+            values.put(BikePointProvider.COL_BIKE_POINT_EMPTY, bikePoint.getEmpty());
+            values.put(BikePointProvider.COL_BIKE_POINT_BIKES, bikePoint.getBikes());
+
+            contentValues.add(values);
+        }
+
+        Uri table = BikePointProvider.BIKE_POINTS;
+        ContentValues[] bulk = new ContentValues[contentValues.size()];
+        contentValues.toArray(bulk);
+
+        getContentResolver().bulkInsert(table, bulk);
+    }
+
+    private void retrieveBikePointsFromDatabase() {
+        getSupportLoaderManager().initLoader(R.id.loader_bike_points, null,
+                new LoaderManager.LoaderCallbacks<Cursor>() {
+
+                    @Override
+                    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+                        return new BikePointCursorLoader(getApplicationContext());
+                    }
+
+                    @Override
+                    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+                        if (!cursor.moveToFirst()) {
+                            Log.d(TAG, "Table is empty");
+                        }
+
+                        mBikePoints = new ArrayList<>();
+
+                        do {
+                            String id = cursor.getString(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
+                            String name = cursor.getString(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
+                            double lat = cursor.getDouble(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
+                            double lon = cursor.getDouble(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
+                            int docks = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
+                            int empty = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
+                            int bikes = cursor.getInt(
+                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
+
+                            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
+                        } while (cursor.moveToNext());
+                    }
+
+                    @Override
+                    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+
+                    }
+                });
+    }
+
+    private static class BikePointCursorLoader extends CursorLoader {
+
+        public BikePointCursorLoader(Context context) {
+            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
         }
     }
 }

@@ -1,10 +1,11 @@
 package com.dnbitstudio.londoncycles.model;
 
+import com.google.gson.JsonArray;
+
 import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.network.TflApi;
 
 import java.io.IOException;
-import java.util.List;
 
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -36,13 +37,9 @@ public class TflService {
         mTflApi = retrofit.create(TflApi.class);
     }
 
-    public void loadBikePoints(Callback<List<BikePoint>> callback) {
+    public void loadBikePoints(Callback<JsonArray> callback) {
         mTflApi.loadBikePoints().enqueue(callback);
     }
-
-//    public void loadBikePointDetails(String bikePointId, Callback<BikePoint> callback) {
-//        mTflApi.loadBikePointDetails(bikePointId).enqueue(callback);
-//    }
 
     private Retrofit.Builder createDebugMockedRetrofitBuilder(String mockedJson) {
         MockedInterceptor mockedInterceptor = new MockedInterceptor(mockedJson);

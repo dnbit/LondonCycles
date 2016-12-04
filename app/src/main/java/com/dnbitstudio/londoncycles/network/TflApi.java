@@ -1,8 +1,6 @@
 package com.dnbitstudio.londoncycles.network;
 
-import com.dnbitstudio.londoncycles.model.BikePoint;
-
-import java.util.List;
+import com.google.gson.JsonArray;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -18,7 +16,7 @@ public interface TflApi {
 //                                               @Query("app_key") String appKey);
 
     @GET("/BikePoint")
-    Call<List<BikePoint>> loadBikePoints();
+    Call<JsonArray> loadBikePoints();
 //
 //    @GET("/BikePoint/{id}")
 //    Call<BikePoint> loadBikePointDetails(@Path("id") String bikePointId);

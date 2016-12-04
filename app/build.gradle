@@ -47,7 +47,10 @@ dependencies {
     compile "com.jakewharton:butterknife:${butterknifeVersion}"
     compile "com.google.android.gms:play-services-location:${playServicesVersion}"
     compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
-    compile 'javax.annotation:javax.annotation-api:1.2'
+    compile 'com.novoda:sqlite-provider:2.0.0'
+
     testCompile 'junit:junit:4.12'
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+
+    debugCompile 'com.amitshekhar.android:debug-db:0.3.0'
 }

@@ -11,6 +11,7 @@ public class LaunchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BikePointListActivity.launchActivity(this);
+
         finish();
     }
 }
