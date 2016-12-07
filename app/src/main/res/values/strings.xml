@@ -7,4 +7,6 @@
     <string name="map">Map</string>
     <string name="list">List</string>
     <string name="explain_demo">See the device LogCat for the output of this demo</string>
+    <string name="account_type">dnbitstudio.com</string>
+    <string name="content_authority">com.dnbitstudio.londoncycles.android.datasync.provider</string>
 </resources>
