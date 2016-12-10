@@ -4,6 +4,12 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission
+            android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission
+            android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission
+            android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
     <application
             android:allowBackup="true"
@@ -51,12 +57,32 @@
                     android:value="com.dnbitstudio.londoncycles.ui.list.BikePointListActivity"/>
         </activity>
 
+        <service android:name=".sync.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+
+            <meta-data
+                    android:name="android.accounts.AccountAuthenticator"
+                    android:resource="@xml/authenticator"/>
+        </service>
 
         <provider
                 android:name=".provider.BikePointProvider"
-                android:authorities="com.dnbitstudio.londoncycles"
-                android:exported="false"/>
+                android:authorities="@string/content_authority"
+                android:exported="false"
+                android:syncable="true"/>
 
+        <service
+                android:name="com.dnbitstudio.londoncycles.sync.SyncService"
+                android:exported="true"
+                android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                       android:resource="@xml/syncadapter"/>
+        </service>
 
     </application>
 

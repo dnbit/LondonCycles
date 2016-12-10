@@ -1,43 +1,62 @@
 package com.dnbitstudio.londoncycles.ui.list;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import com.dnbitstudio.londoncycles.BuildConfig;
 import com.dnbitstudio.londoncycles.R;
-import com.dnbitstudio.londoncycles.model.BikePoint;
+import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.map.MapActivity;
-import com.dnbitstudio.londoncycles.utils.Utils;
 
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-
-import java.util.List;
 
 import butterknife.BindBool;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class BikePointListActivity extends AppCompatActivity {
+public class BikePointListActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    /**
+     * List of Cursor columns to read from when preparing an adapter to populate the ListView.
+     */
+    private static final String[] FROM_COLUMNS = new String[]{
+            BikePointProvider.COL_BIKE_POINT_ID,
+            BikePointProvider.COL_BIKE_POINT_NAME,
+            BikePointProvider.COL_BIKE_POINT_DOCKS,
+            BikePointProvider.COL_BIKE_POINT_BIKES,
+            BikePointProvider.COL_BIKE_POINT_EMPTY
+    };
+    /**
+     * List of Views which will be populated by Cursor data.
+     */
+    private static final int[] TO_FIELDS = new int[]{
+            R.id.id,
+            R.id.name,
+            R.id.docks,
+            R.id.bikes,
+            R.id.empty};
+    private final String TAG = BikePointListActivity.class.getSimpleName();
     @BindBool(R.bool.sw600)
     boolean mTwoPane;
-
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
     @BindView(R.id.bikepoint_list)
-    RecyclerView mRecyclerView;
+    ListView mListView;
+    private int COLUMN_ID = 0;
+    private SimpleCursorAdapter mAdapter;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, BikePointListActivity.class);
@@ -53,9 +72,16 @@ public class BikePointListActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(getTitle());
 
-        if (mRecyclerView != null) {
-            setupRecyclerView(mRecyclerView);
-        }
+        mAdapter = new SimpleCursorAdapter(
+                this,       // Current context
+                R.layout.bikepoint_list_content,  // Layout for individual rows
+                null,                // Cursor
+                FROM_COLUMNS,        // Cursor columns to use
+                TO_FIELDS,           // Layout fields to use
+                0                    // No flags
+        );
+
+        setupListView();
     }
 
     @Override
@@ -78,81 +104,129 @@ public class BikePointListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        if (BuildConfig.DEBUG) {
-            String mockedJson = Utils.loadMockedBikePoints(this);
-            List<BikePoint> bikePoints
-                    = new Gson().fromJson(mockedJson, new TypeToken<List<BikePoint>>() {
-            }.getType());
-            recyclerView.setAdapter(new BikePointListAdapter(bikePoints));
-        }
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "onCreateLoader");
+        return new BikePointCursorLoader(this);
     }
 
-    public class BikePointListAdapter
-            extends RecyclerView.Adapter<BikePointListAdapter.ViewHolder> {
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.d(TAG, "onLoadFinished");
+        mAdapter.changeCursor(cursor);
+        mAdapter.swapCursor(cursor);
+    }
 
-        private final List<BikePoint> mBikePoints;
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset");
+        mAdapter.changeCursor(null);
+        mAdapter.swapCursor(null);
+    }
 
-        public BikePointListAdapter(List<BikePoint> bikePoints) {
-            mBikePoints = bikePoints;
-        }
+    private void setupListView() {
+        mListView.setAdapter(mAdapter);
+//        setEmptyText(getText(R.string.loading));
+        getLoaderManager().initLoader(0, null, this);
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.bikepoint_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = mBikePoints.get(position);
-            holder.mIdView.setText(mBikePoints.get(position).getId());
-            holder.mContentView.setText(mBikePoints.get(position).getName());
-
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String bikePointId = holder.mItem.getId();
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
-                        BikePointDetailFragment fragment = new BikePointDetailFragment();
-                        fragment.setArguments(arguments);
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.bikepoint_detail_container, fragment)
-                                .commit();
-                    } else {
-                        BikePointDetailActivity.launchActivity(v.getContext(), bikePointId);
-                    }
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mBikePoints.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public BikePoint mItem;
-
-            @BindView(R.id.id)
-            public TextView mIdView;
-            @BindView(R.id.content)
-            public TextView mContentView;
-
-            public ViewHolder(View view) {
-                super(view);
-                ButterKnife.bind(this, view);
-                mView = view;
-            }
-
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public String toString() {
-                return super.toString() + " '" + mContentView.getText() + "'";
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                String bikePointId;
+                if (cursor != null) {
+                    bikePointId = cursor.getString(COLUMN_ID);
+                } else {
+                    bikePointId = ((TextView) view.findViewById(R.id.id)).getText().toString();
+                }
+
+                if (mTwoPane) {
+                    Bundle arguments = new Bundle();
+                    arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
+                    BikePointDetailFragment fragment = new BikePointDetailFragment();
+                    fragment.setArguments(arguments);
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.bikepoint_detail_container, fragment)
+                            .commit();
+                } else {
+                    BikePointDetailActivity.launchActivity(getApplicationContext(), bikePointId);
+                }
             }
+        });
+    }
+
+//    public class BikePointListAdapter
+//            extends RecyclerView.Adapter<BikePointListAdapter.ViewHolder> {
+//
+//        private final List<BikePoint> mBikePoints;
+//
+//        public BikePointListAdapter(List<BikePoint> bikePoints) {
+//            mBikePoints = bikePoints;
+//        }
+//
+//        @Override
+//        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//            View view = LayoutInflater.from(parent.getContext())
+//                    .inflate(R.layout.bikepoint_list_content, parent, false);
+//            return new ViewHolder(view);
+//        }
+//
+//        @Override
+//        public void onBindViewHolder(final ViewHolder holder, int position) {
+//            holder.mItem = mBikePoints.get(position);
+//            holder.mIdView.setText(mBikePoints.get(position).getId());
+//            holder.mContentView.setText(mBikePoints.get(position).getName());
+//
+//            holder.mView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    String bikePointId = holder.mItem.getId();
+//                    if (mTwoPane) {
+//                        Bundle arguments = new Bundle();
+//                        arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
+//                        BikePointDetailFragment fragment = new BikePointDetailFragment();
+//                        fragment.setArguments(arguments);
+//                        getSupportFragmentManager().beginTransaction()
+//                                .replace(R.id.bikepoint_detail_container, fragment)
+//                                .commit();
+//                    } else {
+//                        BikePointDetailActivity.launchActivity(v.getContext(), bikePointId);
+//                    }
+//                }
+//            });
+//        }
+//
+//        @Override
+//        public int getItemCount() {
+//            return mBikePoints.size();
+//        }
+//
+//        public class ViewHolder extends RecyclerView.ViewHolder {
+//            public final View mView;
+//            public BikePoint mItem;
+//
+//            @BindView(R.id.id)
+//            public TextView mIdView;
+//            @BindView(R.id.content)
+//            public TextView mContentView;
+//
+//            public ViewHolder(View view) {
+//                super(view);
+//                ButterKnife.bind(this, view);
+//                mView = view;
+//            }
+//
+//            @Override
+//            public String toString() {
+//                return super.toString() + " '" + mContentView.getText() + "'";
+//            }
+//        }
+//    }
+
+    private static class BikePointCursorLoader extends CursorLoader {
+
+        public BikePointCursorLoader(Context context) {
+            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
         }
     }
 }

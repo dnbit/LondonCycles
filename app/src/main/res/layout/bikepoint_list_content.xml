@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="wrap_content"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:minHeight="?android:attr/listPreferredItemHeight"
               android:orientation="vertical">
 
     <TextView
@@ -11,7 +12,25 @@
             android:textAppearance="?attr/textAppearanceListItem"/>
 
     <TextView
-            android:id="@+id/content"
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"/>
+
+    <TextView
+            android:id="@+id/docks"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"/>
+
+    <TextView
+            android:id="@+id/bikes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"/>
+
+    <TextView
+            android:id="@+id/empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"/>
