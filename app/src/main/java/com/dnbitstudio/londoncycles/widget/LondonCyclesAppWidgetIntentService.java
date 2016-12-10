@@ -77,27 +77,22 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
             Log.d(TAG, "Table is empty");
         }
 
-//        mBikePoints = new ArrayList<>();
-
-        if (cursor.moveToNext()) {
+        if (cursor.moveToFirst()) {
             String id = cursor.getString(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
             Log.d(TAG, "on cursor with id: " + id);
             String name = cursor.getString(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
-            double lat = cursor.getDouble(
+            /*double lat = cursor.getDouble(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
             double lon = cursor.getDouble(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
             int docks = cursor.getInt(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));*/
             int empty = cursor.getInt(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
             int bikes = cursor.getInt(
                     cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
-
-//            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
-
 
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,
@@ -107,7 +102,9 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
                 // Construct the RemoteViews object
                 RemoteViews remoteViews = new RemoteViews(
                         getPackageName(), R.layout.london_cycles_app_widget_provider);
-                remoteViews.setTextViewText(R.id.appwidget_text, id);
+                remoteViews.setTextViewText(R.id.appwidget_name, name);
+                remoteViews.setTextViewText(R.id.appwidget_bikes, String.valueOf(bikes));
+                remoteViews.setTextViewText(R.id.appwidget_empty, String.valueOf(empty));
 
                 // Create an Intent to launch MainActivity
                 Intent launchIntent = new Intent(this, BikePointDetailActivity.class);
@@ -126,7 +123,7 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
     private static class BikePointCursorLoader extends CursorLoader {
 
         public BikePointCursorLoader(Context context) {
-            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
+            super(context, BikePointProvider.CLOSEST_BIKE_POINT, null, null, null, null);
         }
     }
 }

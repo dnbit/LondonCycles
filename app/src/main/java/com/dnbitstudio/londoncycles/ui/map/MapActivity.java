@@ -46,10 +46,12 @@ import butterknife.ButterKnife;
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    public static final String LOCATION_SHARED_PREFERENCES = "location_shared_preferences";
+    public static final String KEY_LATITUDE = "latitude";
+    public static final String KEY_LONGITUDE = "longitude";
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
-
     private final String TAG = MapActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -190,6 +192,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void setLatLong(Location location) {
         mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        Utils.saveLatLonInSharedPreferences(this, mLatLng.latitude, mLatLng.longitude);
     }
 
     private void handleNewLocation() {

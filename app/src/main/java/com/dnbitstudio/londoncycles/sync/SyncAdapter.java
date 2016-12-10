@@ -8,6 +8,8 @@ import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
+import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.utils.LocationDistanceComparator;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
@@ -16,12 +18,15 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -151,6 +156,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void saveBikePointsToDatabase() {
+        sortBikePointsByDistance();
+
         Log.d(TAG, "saveBikePointsToDatabase");
         List<ContentValues> contentValues = new ArrayList<>();
         ContentValues values;
@@ -171,7 +178,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ContentValues[] bulk = new ContentValues[contentValues.size()];
         contentValues.toArray(bulk);
 
+        mContentResolver.delete(table, null, null);
         mContentResolver.bulkInsert(table, bulk);
+    }
+
+    private void sortBikePointsByDistance() {
+        SharedPreferences sharedPrefs = getContext().getSharedPreferences(
+                MapActivity.LOCATION_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        double latitude = Double.valueOf(sharedPrefs.getString(MapActivity.KEY_LATITUDE, "0"));
+        double longitude = Double.valueOf(sharedPrefs.getString(MapActivity.KEY_LONGITUDE, "0"));
+
+        Log.d(TAG, "sortBikePointsByDistance - latitude: " + latitude);
+        Log.d(TAG, "sortBikePointsByDistance - longitude: " + longitude);
+        Toast.makeText(getContext(), " " + latitude, Toast.LENGTH_SHORT).show();
+
+        Collections.sort(mBikePoints, new LocationDistanceComparator(latitude, longitude));
     }
 
     private void broadcastUpdate() {

@@ -18,4 +18,8 @@ public class BikePointProvider extends SQLiteContentProviderImpl {
     private static final String TABLE_BIKE_POINT = "bike_point";
     public static final Uri BIKE_POINTS
             = Uri.parse(AUTHORITY).buildUpon().appendPath(TABLE_BIKE_POINT).build();
+    public static final Uri CLOSEST_BIKE_POINT
+            = Uri.parse(AUTHORITY)
+            .buildUpon().appendPath(TABLE_BIKE_POINT)
+            .appendQueryParameter("limit", "1").build();
 }

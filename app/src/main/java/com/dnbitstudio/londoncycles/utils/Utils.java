@@ -1,8 +1,11 @@
 package com.dnbitstudio.londoncycles.utils;
 
+import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -11,6 +14,8 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class Utils {
     public static boolean isNetworkConnected(Context context) {
@@ -67,5 +72,15 @@ public class Utils {
             return null;
         }
         return json;
+    }
+
+    public static void saveLatLonInSharedPreferences(Context context,
+                                                     double latitude, double longitude) {
+        SharedPreferences sharedPreferences
+                = context.getSharedPreferences(MapActivity.LOCATION_SHARED_PREFERENCES, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(MapActivity.KEY_LATITUDE, String.valueOf(latitude));
+        editor.putString(MapActivity.KEY_LONGITUDE, String.valueOf(longitude));
+        editor.apply();
     }
 }

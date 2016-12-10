@@ -9,6 +9,8 @@
     <string name="explain_demo">See the device LogCat for the output of this demo</string>
     <string name="account_type">dnbitstudio.com</string>
     <string name="content_authority">com.dnbitstudio.londoncycles.android.datasync.provider</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_name">Loading</string>
     <string name="add_widget">Add widget</string>
+    <string name="bikes">Bikes</string>
+    <string name="empty">Empty</string>
 </resources>
