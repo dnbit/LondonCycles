@@ -1,0 +1,8 @@
+<resources>
+    <string name="tfl_app_id" translatable="false" templateMergeStrategy="preserve">
+        <!-- Place your tfl app_id here-->
+    </string>
+    <string name="tfl_app_key" translatable="false" templateMergeStrategy="preserve">
+        <!-- Place your tfl app_key here-->
+    </string>
+</resources>
