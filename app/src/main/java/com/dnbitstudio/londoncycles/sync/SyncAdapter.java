@@ -15,6 +15,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ import retrofit2.Response;
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
+    public static final String ACTION_DATA_UPDATED
+            = "com.dnbitstudio.londoncycles.app.ACTION_DATA_UPDATED";
     private static final String BIKE_POINT_PARSE_ID = "id";
     private static final String BIKE_POINT_PARSE_NAME = "commonName";
     private static final String BIKE_POINT_PARSE_LAT = "lat";
@@ -43,7 +46,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final String TAG = SyncAdapter.class.getSimpleName();
     // Global variables
     // Define a variable to contain a content resolver instance
-    ContentResolver mContentResolver;
+    private ContentResolver mContentResolver;
     private List<BikePoint> mBikePoints;
     private BikePoint mBikePoint;
 
@@ -52,10 +55,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        /*
-         * If your app uses a content resolver, get an instance of it
-         * from the incoming Context
-         */
         mContentResolver = context.getContentResolver();
     }
 
@@ -69,10 +68,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             boolean autoInitialize,
             boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
-        /*
-         * If your app uses a content resolver, get an instance of it
-         * from the incoming Context
-         */
         mContentResolver = context.getContentResolver();
     }
 
@@ -104,6 +99,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 parseBikePointJsonArray(bikePointJsonArray);
 
                 saveBikePointsToDatabase();
+                broadcastUpdate();
             }
 
             @Override
@@ -176,5 +172,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         contentValues.toArray(bulk);
 
         mContentResolver.bulkInsert(table, bulk);
+    }
+
+    private void broadcastUpdate() {
+        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
+        getContext().sendBroadcast(dataUpdatedIntent);
     }
 }

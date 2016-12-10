@@ -85,6 +85,7 @@
 
         <receiver android:name=".widget.LondonCyclesAppWidgetProvider">
             <intent-filter>
+                <action android:name="com.dnbitstudio.londoncycles.app.ACTION_DATA_UPDATED"/>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
 
@@ -92,6 +93,11 @@
                     android:name="android.appwidget.provider"
                     android:resource="@xml/london_cycles_app_widget_provider_info"/>
         </receiver>
+
+        <service
+                android:name=".widget.LondonCyclesAppWidgetIntentService"
+                android:exported="false">
+        </service>
     </application>
 
 </manifest>
