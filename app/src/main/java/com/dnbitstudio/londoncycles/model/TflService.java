@@ -37,8 +37,8 @@ public class TflService {
         mTflApi = retrofit.create(TflApi.class);
     }
 
-    public void loadBikePoints(Callback<JsonArray> callback) {
-        mTflApi.loadBikePoints().enqueue(callback);
+    public void loadBikePoints(String appId, String appKey, Callback<JsonArray> callback) {
+        mTflApi.loadBikePoints(appId, appKey).enqueue(callback);
     }
 
     private Retrofit.Builder createDebugMockedRetrofitBuilder(String mockedJson) {

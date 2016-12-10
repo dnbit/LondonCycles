@@ -4,11 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import com.dnbitstudio.londoncycles.BuildConfig;
+import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
-import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
@@ -87,13 +86,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void callApi() {
         Log.d(TAG, "CallApi");
         String mockedJson = "";
-        if (BuildConfig.DEBUG) {
-            mockedJson = Utils.loadMockedBikePoints(getContext());
-        }
+//        if (BuildConfig.DEBUG) {
+//            mockedJson = Utils.loadMockedBikePoints(getContext());
+//        }
+
+        String appId = getContext().getString(R.string.tfl_app_id);
+        String appKey = getContext().getString(R.string.tfl_app_key);
 
         TflService tflService = new TflService(mockedJson);
-
-        tflService.loadBikePoints(new Callback<JsonArray>() {
+        tflService.loadBikePoints(appId, appKey, new Callback<JsonArray>() {
             @Override
             public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
                 Log.d(TAG, "onResponse");

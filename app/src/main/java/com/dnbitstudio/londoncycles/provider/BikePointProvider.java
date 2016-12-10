@@ -6,7 +6,7 @@ import novoda.lib.sqliteprovider.provider.SQLiteContentProviderImpl;
 
 public class BikePointProvider extends SQLiteContentProviderImpl {
 
-    public static final String COL_BIKE_POINT_ID = "id";
+    public static final String COL_BIKE_POINT_ID = "_id";
     public static final String COL_BIKE_POINT_NAME = "name";
     public static final String COL_BIKE_POINT_LAT = "lat";
     public static final String COL_BIKE_POINT_LON = "lon";
