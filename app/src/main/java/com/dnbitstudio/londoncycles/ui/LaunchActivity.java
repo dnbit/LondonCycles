@@ -1,7 +1,7 @@
 package com.dnbitstudio.londoncycles.ui;
 
 import com.dnbitstudio.londoncycles.R;
-import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
+import com.dnbitstudio.londoncycles.ui.map.MapActivity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -46,17 +46,15 @@ public class LaunchActivity extends AppCompatActivity {
         mAccount = CreateSyncAccount(this);
         setupSync();
 
-        BikePointListActivity.launchActivity(this);
+        MapActivity.launchActivity(this);
         finish();
     }
 
     public void setupSync() {
         // Pass the settings flags by inserting them in a bundle
         Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
         ContentResolver.setIsSyncable(mAccount, mAutority, 1);
         ContentResolver.setSyncAutomatically(mAccount, mAutority, true);

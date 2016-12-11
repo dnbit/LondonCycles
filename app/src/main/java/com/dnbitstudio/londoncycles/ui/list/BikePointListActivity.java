@@ -39,6 +39,7 @@ public class BikePointListActivity extends AppCompatActivity
             BikePointProvider.COL_BIKE_POINT_BIKES,
             BikePointProvider.COL_BIKE_POINT_EMPTY
     };
+
     /**
      * List of Views which will be populated by Cursor data.
      */
@@ -48,6 +49,7 @@ public class BikePointListActivity extends AppCompatActivity
             R.id.docks,
             R.id.bikes,
             R.id.empty};
+
     private final String TAG = BikePointListActivity.class.getSimpleName();
     @BindBool(R.bool.sw600)
     boolean mTwoPane;
@@ -154,74 +156,6 @@ public class BikePointListActivity extends AppCompatActivity
             }
         });
     }
-
-//    public class BikePointListAdapter
-//            extends RecyclerView.Adapter<BikePointListAdapter.ViewHolder> {
-//
-//        private final List<BikePoint> mBikePoints;
-//
-//        public BikePointListAdapter(List<BikePoint> bikePoints) {
-//            mBikePoints = bikePoints;
-//        }
-//
-//        @Override
-//        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//            View view = LayoutInflater.from(parent.getContext())
-//                    .inflate(R.layout.bikepoint_list_content, parent, false);
-//            return new ViewHolder(view);
-//        }
-//
-//        @Override
-//        public void onBindViewHolder(final ViewHolder holder, int position) {
-//            holder.mItem = mBikePoints.get(position);
-//            holder.mIdView.setText(mBikePoints.get(position).getId());
-//            holder.mContentView.setText(mBikePoints.get(position).getName());
-//
-//            holder.mView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    String bikePointId = holder.mItem.getId();
-//                    if (mTwoPane) {
-//                        Bundle arguments = new Bundle();
-//                        arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
-//                        BikePointDetailFragment fragment = new BikePointDetailFragment();
-//                        fragment.setArguments(arguments);
-//                        getSupportFragmentManager().beginTransaction()
-//                                .replace(R.id.bikepoint_detail_container, fragment)
-//                                .commit();
-//                    } else {
-//                        BikePointDetailActivity.launchActivity(v.getContext(), bikePointId);
-//                    }
-//                }
-//            });
-//        }
-//
-//        @Override
-//        public int getItemCount() {
-//            return mBikePoints.size();
-//        }
-//
-//        public class ViewHolder extends RecyclerView.ViewHolder {
-//            public final View mView;
-//            public BikePoint mItem;
-//
-//            @BindView(R.id.id)
-//            public TextView mIdView;
-//            @BindView(R.id.content)
-//            public TextView mContentView;
-//
-//            public ViewHolder(View view) {
-//                super(view);
-//                ButterKnife.bind(this, view);
-//                mView = view;
-//            }
-//
-//            @Override
-//            public String toString() {
-//                return super.toString() + " '" + mContentView.getText() + "'";
-//            }
-//        }
-//    }
 
     private static class BikePointCursorLoader extends CursorLoader {
 
