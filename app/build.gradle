@@ -36,6 +36,7 @@ dependencies {
         playServicesVersion = '9.8.0'
         retrofitVersion = '2.1.0'
         butterknifeVersion = '8.4.0'
+        permissionsDispatcherVersion = '2.2.1'
     }
 
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
@@ -48,9 +49,11 @@ dependencies {
     compile "com.google.android.gms:play-services-location:${playServicesVersion}"
     compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
     compile 'com.novoda:sqlite-provider:2.0.0'
+    compile "com.github.hotchemi:permissionsdispatcher:${permissionsDispatcherVersion}"
+    annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:${permissionsDispatcherVersion}"
 
     testCompile 'junit:junit:4.12'
-    annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"
 
     debugCompile 'com.amitshekhar.android:debug-db:0.3.0'
 }

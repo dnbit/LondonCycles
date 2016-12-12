@@ -1,10 +1,5 @@
 package com.dnbitstudio.londoncycles.ui.map;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -16,26 +11,21 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
+import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
-import com.dnbitstudio.londoncycles.utils.Utils;
 
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.IntentSender;
+import android.content.Loader;
 import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,24 +33,18 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapActivity extends BaseLocationActivity
+        implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String LOCATION_SHARED_PREFERENCES = "location_shared_preferences";
-    public static final String KEY_LATITUDE = "latitude";
-    public static final String KEY_LONGITUDE = "longitude";
-    private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
     private final String TAG = MapActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private LatLng mLatLng;
     private CameraPosition mCameraPosition;
-    private List<BikePoint> mBikePoints;
+    private List<BikePoint> mBikePoints = new ArrayList<>();
+    private LatLng mLatLng;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -86,33 +70,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mLatLng = savedInstanceState.getParcelable(MARKER_LAT_LONG);
         }
 
-        buildGoogleApiClient();
-
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1000); // 1 second, in milliseconds
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            mGoogleApiClient.disconnect();
-        }
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(CAMERA_POSITION, mMap.getCameraPosition());
+        if (mMap != null) {
+            outState.putParcelable(CAMERA_POSITION, mMap.getCameraPosition());
+        }
         outState.putParcelable(MARKER_LAT_LONG, mLatLng);
     }
 
@@ -137,62 +103,39 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     @Override
+    public void setLatLong(Location location) {
+        super.setLatLong(location);
+        mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        handleNewLocation();
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Utils.isGPSEnabled(this);
-        if (!Utils.isNetworkConnected(this)) {
-            Toast.makeText(getApplicationContext(), R.string.network_unavailable,
-                    Toast.LENGTH_SHORT).show();
-        } else {
-            Log.d(TAG, "Location services connected");
-            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (location == null) {
-                // request location updates and let the location listener handle the updates
-                LocationServices.FusedLocationApi
-                        .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-            } else {
-                // use the location
-                setLatLong(location);
-                handleNewLocation();
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "Location services disconnected");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this,
-                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                Log.d(TAG, "Connection Failed " + e.getMessage());
-            }
-        } else {
-            Log.d(TAG, "Location services connection failed with code " +
-                    connectionResult.getErrorCode());
-        }
-    }
-
-    @Override
     public void onLocationChanged(Location location) {
-        Log.d(TAG, "location changed");
-        setLatLong(location);
+        super.onLocationChanged(location);
         handleNewLocation();
     }
 
-    private void setLatLong(Location location) {
-        mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-        Utils.saveLatLonInSharedPreferences(this, mLatLng.latitude, mLatLng.longitude);
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.d(TAG, "onCreateLoader");
+        return new BikePointCursorLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.d(TAG, "onLoadFinished");
+        parseBikePointsFromCursor(cursor);
+        putMarkersInMap();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset");
     }
 
     private void handleNewLocation() {
@@ -207,19 +150,39 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
-    protected synchronized void buildGoogleApiClient() {
-        // Initialize our GoogleAPIClient object
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
     private void setUpMap() {
         mMap.clear();
         MarkerOptions markerOptions = new MarkerOptions().position(mLatLng);
         mMap.addMarker(markerOptions);
+        putMarkersInMap();
+    }
+
+    private void parseBikePointsFromCursor(Cursor cursor) {
+        if (!cursor.moveToFirst()) {
+            Log.d(TAG, "Table is empty");
+            return;
+        }
+
+        mBikePoints = new ArrayList<>();
+
+        do {
+            String id = cursor.getString(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
+            String name = cursor.getString(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
+            double lat = cursor.getDouble(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
+            double lon = cursor.getDouble(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
+            int docks = cursor.getInt(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
+            int empty = cursor.getInt(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
+            int bikes = cursor.getInt(
+                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
+
+            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
+        } while (cursor.moveToNext());
     }
 
     private void putMarkersInMap() {
@@ -228,50 +191,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             MarkerOptions markerOptions = new MarkerOptions().position(latLong);
             mMap.addMarker(markerOptions);
         }
-    }
-
-    private void retrieveBikePointsFromDatabase() {
-        getSupportLoaderManager().initLoader(R.id.loader_bike_points, null,
-                new LoaderManager.LoaderCallbacks<Cursor>() {
-
-                    @Override
-                    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-                        return new BikePointCursorLoader(getApplicationContext());
-                    }
-
-                    @Override
-                    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-                        if (!cursor.moveToFirst()) {
-                            Log.d(TAG, "Table is empty");
-                        }
-
-                        mBikePoints = new ArrayList<>();
-
-                        do {
-                            String id = cursor.getString(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
-                            String name = cursor.getString(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
-                            double lat = cursor.getDouble(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
-                            double lon = cursor.getDouble(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
-                            int docks = cursor.getInt(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
-                            int empty = cursor.getInt(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
-                            int bikes = cursor.getInt(
-                                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
-
-                            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
-                        } while (cursor.moveToNext());
-                    }
-
-                    @Override
-                    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-                    }
-                });
     }
 
     private static class BikePointCursorLoader extends CursorLoader {

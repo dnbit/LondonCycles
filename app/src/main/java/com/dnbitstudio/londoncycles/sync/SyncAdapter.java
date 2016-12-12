@@ -8,7 +8,7 @@ import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.model.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
-import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.utils.LocationDistanceComparator;
 
 import android.accounts.Account;
@@ -23,7 +23,6 @@ import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,13 +183,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void sortBikePointsByDistance() {
         SharedPreferences sharedPrefs = getContext().getSharedPreferences(
-                MapActivity.LOCATION_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        double latitude = Double.valueOf(sharedPrefs.getString(MapActivity.KEY_LATITUDE, "0"));
-        double longitude = Double.valueOf(sharedPrefs.getString(MapActivity.KEY_LONGITUDE, "0"));
-
-        Log.d(TAG, "sortBikePointsByDistance - latitude: " + latitude);
-        Log.d(TAG, "sortBikePointsByDistance - longitude: " + longitude);
-        Toast.makeText(getContext(), " " + latitude, Toast.LENGTH_SHORT).show();
+                BaseLocationActivity.LOCATION_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        double latitude = Double.valueOf(
+                sharedPrefs.getString(BaseLocationActivity.KEY_LATITUDE, "0"));
+        double longitude = Double.valueOf(
+                sharedPrefs.getString(BaseLocationActivity.KEY_LONGITUDE, "0"));
 
         Collections.sort(mBikePoints, new LocationDistanceComparator(latitude, longitude));
     }
