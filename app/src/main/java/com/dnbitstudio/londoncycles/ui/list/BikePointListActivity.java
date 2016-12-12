@@ -2,6 +2,7 @@ package com.dnbitstudio.londoncycles.ui.list;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
+import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.ui.map.MapActivity;
 
 import android.app.LoaderManager;
@@ -11,7 +12,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -26,7 +26,7 @@ import butterknife.BindBool;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class BikePointListActivity extends AppCompatActivity
+public class BikePointListActivity extends BaseLocationActivity
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /**

@@ -1,6 +1,6 @@
 package com.dnbitstudio.londoncycles.utils;
 
-import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -76,11 +76,11 @@ public class Utils {
 
     public static void saveLatLonInSharedPreferences(Context context,
                                                      double latitude, double longitude) {
-        SharedPreferences sharedPreferences
-                = context.getSharedPreferences(MapActivity.LOCATION_SHARED_PREFERENCES, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(
+                BaseLocationActivity.LOCATION_SHARED_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(MapActivity.KEY_LATITUDE, String.valueOf(latitude));
-        editor.putString(MapActivity.KEY_LONGITUDE, String.valueOf(longitude));
+        editor.putString(BaseLocationActivity.KEY_LATITUDE, String.valueOf(latitude));
+        editor.putString(BaseLocationActivity.KEY_LONGITUDE, String.valueOf(longitude));
         editor.apply();
     }
 }
