@@ -1,6 +1,7 @@
-package com.dnbitstudio.londoncycles.ui.list;
+package com.dnbitstudio.londoncycles.ui.detail;
 
 import com.dnbitstudio.londoncycles.R;
+import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 
 import android.content.Context;
 import android.content.Intent;

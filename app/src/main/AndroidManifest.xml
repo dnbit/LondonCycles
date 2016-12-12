@@ -45,7 +45,7 @@
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-                android:name=".ui.list.BikePointDetailActivity"
+                android:name=".ui.detail.BikePointDetailActivity"
                 android:label="@string/title_bikepoint_detail"
                 android:parentActivityName=".ui.list.BikePointListActivity"
                 android:theme="@style/AppTheme.NoActionBar">
