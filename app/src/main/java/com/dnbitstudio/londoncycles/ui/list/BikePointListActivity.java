@@ -149,7 +149,7 @@ public class BikePointListActivity extends BaseLocationActivity
                     arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
                     BikePointDetailFragment fragment = new BikePointDetailFragment();
                     fragment.setArguments(arguments);
-                    getSupportFragmentManager().beginTransaction()
+                    getFragmentManager().beginTransaction()
                             .replace(R.id.bikepoint_detail_container, fragment)
                             .commit();
                 } else {

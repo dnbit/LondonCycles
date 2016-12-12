@@ -68,7 +68,7 @@ public class BikePointDetailActivity extends AppCompatActivity {
             arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
             BikePointDetailFragment fragment = new BikePointDetailFragment();
             fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .add(R.id.bikepoint_detail_container, fragment)
                     .commit();
         }
