@@ -1,16 +1,18 @@
 <resources>
     <string name="app_name">London Cycles</string>
-    <string name="title_activity_map">Map</string>
+    <string name="title_activity_map">Station Map</string>
     <string name="network_unavailable">Network unavailable</string>
-    <string name="title_bikepoint_list">BikePoints</string>
-    <string name="title_bikepoint_detail">BikePoint Detail</string>
+    <string name="title_bikepoint_list">Station List</string>
+    <string name="title_bikepoint_detail">Station Detail</string>
     <string name="map">Map</string>
     <string name="list">List</string>
     <string name="explain_demo">See the device LogCat for the output of this demo</string>
-    <string name="account_type">dnbitstudio.com</string>
+    <string name="account_type" translatable="false">dnbitstudio.com</string>
     <string name="content_authority">com.dnbitstudio.londoncycles.android.datasync.provider</string>
     <string name="appwidget_name">Loading</string>
     <string name="add_widget">Add widget</string>
     <string name="bikes">Bikes</string>
     <string name="empty">Empty</string>
+    <string name="available_bikes">Available Bikes</string>
+    <string name="empty_docks">Empty Docks</string>
 </resources>

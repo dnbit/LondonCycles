@@ -1,11 +1,11 @@
 package com.dnbitstudio.londoncycles.ui.detail;
 
 import com.dnbitstudio.londoncycles.R;
+import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
-import com.dnbitstudio.londoncycles.ui.detail.dummy.DummyContent;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
+import com.dnbitstudio.londoncycles.utils.CursorUtils;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -13,13 +13,15 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -37,10 +39,13 @@ public class BikePointDetailFragment extends Fragment
      */
     public static final String ARG_ITEM_ID = "item_id";
     private final String TAG = BikePointDetailFragment.class.getSimpleName();
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private DummyContent.DummyItem mItem;
+    @BindView(R.id.detail_name)
+    TextView mName;
+    @BindView(R.id.detail_bikes)
+    TextView mBikes;
+    @BindView(R.id.detail_empty)
+    TextView mEmpty;
+    private BikePoint mBikePoint;
     private String mId;
 
     /**
@@ -56,17 +61,6 @@ public class BikePointDetailFragment extends Fragment
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mId = getArguments().getString(ARG_ITEM_ID);
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout
-                    = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle(mItem.content);
-            }
         }
     }
 
@@ -75,11 +69,6 @@ public class BikePointDetailFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.bikepoint_detail, container, false);
         ButterKnife.bind(this, rootView);
-
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.bikepoint_detail)).setText(mItem.details);
-        }
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -95,11 +84,24 @@ public class BikePointDetailFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         Log.d(TAG, "onLoadFinished");
+        List<BikePoint> bikePoints = CursorUtils.parseBikePointsFromCursor(cursor);
+        if (bikePoints != null && bikePoints.size() > 0) {
+            mBikePoint = bikePoints.get(0);
+            populateViews();
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         Log.d(TAG, "onLoaderReset");
+    }
+
+    private void populateViews() {
+        if (mBikePoint != null) {
+            mName.setText(mBikePoint.getName());
+            mBikes.setText(String.valueOf(mBikePoint.getBikes()));
+            mEmpty.setText(String.valueOf(mBikePoint.getEmpty()));
+        }
     }
 
     private static class BikePointCursorLoader extends CursorLoader {
