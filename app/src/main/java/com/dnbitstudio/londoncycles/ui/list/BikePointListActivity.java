@@ -6,6 +6,7 @@ import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailActivity;
 import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailFragment;
 import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -61,6 +63,7 @@ public class BikePointListActivity extends BaseLocationActivity
     ListView mListView;
     private int COLUMN_ID = 0;
     private SimpleCursorAdapter mAdapter;
+    private BikePointDetailFragment mFragment;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, BikePointListActivity.class);
@@ -86,6 +89,7 @@ public class BikePointListActivity extends BaseLocationActivity
         );
 
         setupListView();
+        setupFab();
     }
 
     @Override
@@ -147,16 +151,30 @@ public class BikePointListActivity extends BaseLocationActivity
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
-                    BikePointDetailFragment fragment = new BikePointDetailFragment();
-                    fragment.setArguments(arguments);
+                    mFragment = new BikePointDetailFragment();
+                    mFragment.setArguments(arguments);
                     getFragmentManager().beginTransaction()
-                            .replace(R.id.bikepoint_detail_container, fragment)
+                            .replace(R.id.bikepoint_detail_container, mFragment)
                             .commit();
                 } else {
                     BikePointDetailActivity.launchActivity(getApplicationContext(), bikePointId);
                 }
             }
         });
+    }
+
+    private void setupFab() {
+        if (mTwoPane) {
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    double lat = mFragment.mBikePoint.getLat();
+                    double lon = mFragment.mBikePoint.getLon();
+                    startActivity(Utils.generateNavigationIntent(lat, lon));
+                }
+            });
+        }
     }
 
     private static class BikePointCursorLoader extends CursorLoader {

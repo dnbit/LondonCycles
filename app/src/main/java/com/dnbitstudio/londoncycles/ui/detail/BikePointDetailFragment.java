@@ -39,13 +39,13 @@ public class BikePointDetailFragment extends Fragment
      */
     public static final String ARG_ITEM_ID = "item_id";
     private final String TAG = BikePointDetailFragment.class.getSimpleName();
+    public BikePoint mBikePoint;
     @BindView(R.id.detail_name)
     TextView mName;
     @BindView(R.id.detail_bikes)
     TextView mBikes;
     @BindView(R.id.detail_empty)
     TextView mEmpty;
-    private BikePoint mBikePoint;
     private String mId;
 
     /**

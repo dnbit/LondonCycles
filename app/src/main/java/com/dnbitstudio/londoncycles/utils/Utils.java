@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -82,5 +83,10 @@ public class Utils {
         editor.putString(BaseLocationActivity.KEY_LATITUDE, String.valueOf(latitude));
         editor.putString(BaseLocationActivity.KEY_LONGITUDE, String.valueOf(longitude));
         editor.apply();
+    }
+
+    public static Intent generateNavigationIntent(double lat, double lon) {
+        String uriString = "http://maps.google.com/maps?daddr=" + lat + "," + lon;
+        return new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
     }
 }
