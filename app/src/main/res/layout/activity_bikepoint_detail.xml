@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="com.dnbitstudio.londoncycles.ui.list.BikePointDetailActivity"
+        tools:context="com.dnbitstudio.londoncycles.ui.detail.BikePointDetailActivity"
         tools:ignore="MergeRootFrame">
 
     <android.support.design.widget.AppBarLayout
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/stat_notify_chat"
+            app:srcCompat="@drawable/ic_navigation"
             app:layout_anchor="@+id/bikepoint_detail_container"
             app:layout_anchorGravity="top|end"/>
 

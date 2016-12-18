@@ -3,7 +3,10 @@ package com.dnbitstudio.londoncycles.ui.list;
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
+import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailActivity;
+import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailFragment;
 import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -12,6 +15,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -50,6 +54,7 @@ public class BikePointListActivity extends BaseLocationActivity
             R.id.bikes,
             R.id.empty};
 
+    private static final String FAB_VISIBILITY = "fab_visibility";
     private final String TAG = BikePointListActivity.class.getSimpleName();
     @BindBool(R.bool.sw600)
     boolean mTwoPane;
@@ -59,6 +64,9 @@ public class BikePointListActivity extends BaseLocationActivity
     ListView mListView;
     private int COLUMN_ID = 0;
     private SimpleCursorAdapter mAdapter;
+    private BikePointDetailFragment mFragment;
+    private boolean mIsFabVisible = false;
+    private FloatingActionButton mFab;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, BikePointListActivity.class);
@@ -70,6 +78,10 @@ public class BikePointListActivity extends BaseLocationActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bikepoint_list);
         ButterKnife.bind(this);
+
+        if (savedInstanceState != null) {
+            mIsFabVisible = savedInstanceState.getBoolean(FAB_VISIBILITY);
+        }
 
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(getTitle());
@@ -84,6 +96,13 @@ public class BikePointListActivity extends BaseLocationActivity
         );
 
         setupListView();
+        setupFab();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(FAB_VISIBILITY, mIsFabVisible);
     }
 
     @Override
@@ -145,16 +164,39 @@ public class BikePointListActivity extends BaseLocationActivity
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
-                    BikePointDetailFragment fragment = new BikePointDetailFragment();
-                    fragment.setArguments(arguments);
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.bikepoint_detail_container, fragment)
+                    mFragment = new BikePointDetailFragment();
+                    mFragment.setArguments(arguments);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.bikepoint_detail_container, mFragment)
                             .commit();
+
+                    mIsFabVisible = true;
+                    if (mFab != null) {
+                        mFab.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     BikePointDetailActivity.launchActivity(getApplicationContext(), bikePointId);
                 }
             }
         });
+    }
+
+    private void setupFab() {
+        if (mTwoPane) {
+            mFab = (FloatingActionButton) findViewById(R.id.fab);
+            mFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    double lat = mFragment.mBikePoint.getLat();
+                    double lon = mFragment.mBikePoint.getLon();
+                    startActivity(Utils.generateNavigationIntent(lat, lon));
+                }
+            });
+
+            if (mIsFabVisible) {
+                mFab.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private static class BikePointCursorLoader extends CursorLoader {

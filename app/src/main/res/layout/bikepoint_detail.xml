@@ -1,9 +1,80 @@
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          android:id="@+id/bikepoint_detail"
-          style="?android:attr/textAppearanceLarge"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:padding="16dp"
-          android:textIsSelectable="true"
-          tools:context="com.dnbitstudio.londoncycles.ui.list.BikePointDetailFragment"/>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="28dp"
+        android:orientation="vertical"
+        tools:context="com.dnbitstudio.londoncycles.ui.detail.BikePointDetailFragment">
+
+    <TextView
+            android:id="@+id/detail_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            style="?android:attr/textAppearanceLarge"
+            tools:text="Station Name"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:gravity="center">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="@string/available_bikes"
+                    style="?android:attr/textAppearanceLarge"/>
+
+            <TextView
+                    android:id="@+id/detail_bikes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    style="?android:attr/textAppearanceLarge"
+                    tools:text="16"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="@string/empty_docks"
+                    style="?android:attr/textAppearanceLarge"/>
+
+            <TextView
+                    android:id="@+id/detail_empty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/textAppearanceLarge"
+                    tools:text="8"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.gms.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:apiKey="@string/google_maps_key"
+            android:clickable="true"
+            android:enabled="true"
+            android:layout_margin="16dp"/>
+
+</LinearLayout>

@@ -2,8 +2,8 @@ package com.dnbitstudio.londoncycles.widget;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
-import com.dnbitstudio.londoncycles.ui.list.BikePointDetailActivity;
-import com.dnbitstudio.londoncycles.ui.list.BikePointDetailFragment;
+import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailActivity;
+import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailFragment;
 
 import android.app.IntentService;
 import android.app.PendingIntent;

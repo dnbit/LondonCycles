@@ -13,6 +13,7 @@ import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
+import com.dnbitstudio.londoncycles.utils.CursorUtils;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -129,7 +130,7 @@ public class MapActivity extends BaseLocationActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         Log.d(TAG, "onLoadFinished");
-        parseBikePointsFromCursor(cursor);
+        mBikePoints = CursorUtils.parseBikePointsFromCursor(cursor);
         putMarkersInMap();
     }
 
@@ -155,34 +156,6 @@ public class MapActivity extends BaseLocationActivity
         MarkerOptions markerOptions = new MarkerOptions().position(mLatLng);
         mMap.addMarker(markerOptions);
         putMarkersInMap();
-    }
-
-    private void parseBikePointsFromCursor(Cursor cursor) {
-        if (!cursor.moveToFirst()) {
-            Log.d(TAG, "Table is empty");
-            return;
-        }
-
-        mBikePoints = new ArrayList<>();
-
-        do {
-            String id = cursor.getString(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_ID));
-            String name = cursor.getString(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_NAME));
-            double lat = cursor.getDouble(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LAT));
-            double lon = cursor.getDouble(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_LON));
-            int docks = cursor.getInt(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_DOCKS));
-            int empty = cursor.getInt(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_EMPTY));
-            int bikes = cursor.getInt(
-                    cursor.getColumnIndex(BikePointProvider.COL_BIKE_POINT_BIKES));
-
-            mBikePoints.add(new BikePoint(id, name, lat, lon, docks, empty, bikes));
-        } while (cursor.moveToNext());
     }
 
     private void putMarkersInMap() {

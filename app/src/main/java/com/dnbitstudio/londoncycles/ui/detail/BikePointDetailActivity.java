@@ -1,16 +1,16 @@
-package com.dnbitstudio.londoncycles.ui.list;
+package com.dnbitstudio.londoncycles.ui.detail;
 
 import com.dnbitstudio.londoncycles.R;
+import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
+import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,6 +28,7 @@ public class BikePointDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.detail_toolbar)
     Toolbar mToolbar;
+    private BikePointDetailFragment mFragment;
 
     public static void launchActivity(Context context, String bikePointId) {
         Intent intent = new Intent(context, BikePointDetailActivity.class);
@@ -65,10 +66,10 @@ public class BikePointDetailActivity extends AppCompatActivity {
             Bundle arguments = new Bundle();
             String bikePointId = getIntent().getStringExtra(BikePointDetailFragment.ARG_ITEM_ID);
             arguments.putString(BikePointDetailFragment.ARG_ITEM_ID, bikePointId);
-            BikePointDetailFragment fragment = new BikePointDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.bikepoint_detail_container, fragment)
+            mFragment = new BikePointDetailFragment();
+            mFragment.setArguments(arguments);
+            getFragmentManager().beginTransaction()
+                    .add(R.id.bikepoint_detail_container, mFragment)
                     .commit();
         }
     }
@@ -90,8 +91,9 @@ public class BikePointDetailActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.fab)
-    public void fabClicked(View view) {
-        Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+    public void fabClicked() {
+        double lat = mFragment.mBikePoint.getLat();
+        double lon = mFragment.mBikePoint.getLon();
+        startActivity(Utils.generateNavigationIntent(lat, lon));
     }
 }
