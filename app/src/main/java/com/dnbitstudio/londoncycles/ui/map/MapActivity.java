@@ -4,16 +4,21 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
+import com.dnbitstudio.londoncycles.ui.detail.BikePointDetailActivity;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.CursorUtils;
+import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -21,7 +26,9 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -34,8 +41,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MapActivity extends BaseLocationActivity
-        implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<Cursor> {
+public class MapActivity extends BaseLocationActivity implements
+        OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
@@ -46,6 +54,9 @@ public class MapActivity extends BaseLocationActivity
     private CameraPosition mCameraPosition;
     private List<BikePoint> mBikePoints = new ArrayList<>();
     private LatLng mLatLng;
+    private BitmapDescriptor mIconMarkerCurrent;
+    private BitmapDescriptor mIconMarkerBikePoint;
+    private boolean mMarkersInMap = false;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -72,6 +83,8 @@ public class MapActivity extends BaseLocationActivity
         }
 
         getLoaderManager().initLoader(0, null, this);
+
+        loadIconMarkers();
     }
 
     @Override
@@ -113,6 +126,13 @@ public class MapActivity extends BaseLocationActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnInfoWindowClickListener(this);
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        String bikePointId = (String) marker.getTag();
+        BikePointDetailActivity.launchActivity(this, bikePointId);
     }
 
     @Override
@@ -130,8 +150,10 @@ public class MapActivity extends BaseLocationActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         Log.d(TAG, "onLoadFinished");
-        mBikePoints = CursorUtils.parseBikePointsFromCursor(cursor);
-        putMarkersInMap();
+        if (!mMarkersInMap) {
+            mBikePoints = CursorUtils.parseBikePointsFromCursor(cursor);
+            putMarkersInMap();
+        }
     }
 
     @Override
@@ -152,24 +174,93 @@ public class MapActivity extends BaseLocationActivity
     }
 
     private void setUpMap() {
-        mMap.clear();
-        MarkerOptions markerOptions = new MarkerOptions().position(mLatLng);
-        mMap.addMarker(markerOptions);
-        putMarkersInMap();
+//        mMap.clear();
+//        MarkerOptions markerOptions = new MarkerOptions()
+//                .position(mLatLng)
+//                .icon(mIconMarkerCurrent);
+//        mMap.addMarker(markerOptions);
+//        putMarkersInMap();
+    }
+
+    private void loadIconMarkers() {
+        Bitmap iconBitmap = Utils
+                .getBitmapFromVectorDrawable(this, R.drawable.ic_current_position_map_marker);
+        mIconMarkerCurrent = BitmapDescriptorFactory.fromBitmap(iconBitmap);
+
+        iconBitmap = Utils.getBitmapFromVectorDrawable(this, R.drawable.ic_bikepoint_map_marker);
+        mIconMarkerBikePoint = BitmapDescriptorFactory.fromBitmap(iconBitmap);
     }
 
     private void putMarkersInMap() {
-        for (BikePoint bikepoint : mBikePoints) {
-            LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
-            MarkerOptions markerOptions = new MarkerOptions().position(latLong);
-            mMap.addMarker(markerOptions);
+        if (mMarkersInMap) {
+            return;
         }
+
+        Log.d(TAG, "init process markers");
+        List<MarkerOptions> markerOptionsList = new ArrayList<>();
+//        for (BikePoint bikepoint : mBikePoints) {
+//            LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
+//            MarkerOptions markerOptions = new MarkerOptions()
+//                    .position(latLong)
+//                    .title(bikepoint.getName())
+//                    .icon(mIconMarkerBikePoint);
+//            markerOptionsList.add(markerOptions);
+//            Marker marker = mMap.addMarker(markerOptions);
+//            marker.setTag(bikepoint.getId());
+//            marker.showInfoWindow();
+//        }
+
+        new DisplayPinLocationsTask().execute();
+
+//        if (markerOptionsList.size() > 0 ) {
+//            mMarkersInMap = true;
+//        }
+        Log.d(TAG, "finish process markers");
     }
 
     private static class BikePointCursorLoader extends CursorLoader {
 
         public BikePointCursorLoader(Context context) {
             super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
+        }
+    }
+
+    class DisplayPinLocationsTask extends AsyncTask<Void, Void, Void> {
+        public DisplayPinLocationsTask() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            for (final BikePoint bikepoint : mBikePoints) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(latLong)
+                                .title(bikepoint.getName())
+                                .icon(mIconMarkerBikePoint);
+                        Marker marker = mMap.addMarker(markerOptions);
+                        marker.setTag(bikepoint.getId());
+//                        marker.showInfoWindow();
+                    }
+                });
+
+                // Sleep so we let other UI actions happen in between the markers.
+                try {
+                    Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    // Don't care
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mMarkersInMap = true;
         }
     }
 }
