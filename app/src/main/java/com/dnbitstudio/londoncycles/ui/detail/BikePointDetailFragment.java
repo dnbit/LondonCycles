@@ -1,5 +1,14 @@
 package com.dnbitstudio.londoncycles.ui.detail;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
@@ -31,7 +40,7 @@ import butterknife.ButterKnife;
  * on handsets.
  */
 public class BikePointDetailFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
      * The fragment argument representing the item ID that this fragment
@@ -46,7 +55,11 @@ public class BikePointDetailFragment extends Fragment
     TextView mBikes;
     @BindView(R.id.detail_empty)
     TextView mEmpty;
+    @BindView(R.id.map)
+    MapView mMapView;
+    private GoogleMap mMap;
     private String mId;
+    private CameraPosition mCameraPosition;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -58,7 +71,6 @@ public class BikePointDetailFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mId = getArguments().getString(ARG_ITEM_ID);
         }
@@ -72,7 +84,59 @@ public class BikePointDetailFragment extends Fragment
 
         getLoaderManager().initLoader(0, null, this);
 
+        mMapView.onCreate(savedInstanceState);
+        mMapView.getMapAsync(this);
+
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+        MapsInitializer.initialize(this.getActivity());
+
+        initCameraPosition();
+    }
+
+    private void initCameraPosition() {
+        if (mBikePoint != null && mMap != null && mCameraPosition == null) {
+            LatLng latLng = new LatLng(mBikePoint.getLat(), mBikePoint.getLon());
+            mCameraPosition = new CameraPosition.Builder()
+                    .target(latLng)
+                    .zoom(15)
+                    .build();
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
+
+            mMap.clear();
+            MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+            mMap.addMarker(markerOptions);
+        }
     }
 
     @Override
@@ -89,6 +153,7 @@ public class BikePointDetailFragment extends Fragment
             mBikePoint = bikePoints.get(0);
             populateViews();
         }
+        initCameraPosition();
     }
 
     @Override
