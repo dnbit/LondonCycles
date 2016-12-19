@@ -49,6 +49,7 @@ dependencies {
     compile "com.jakewharton:butterknife:${butterknifeVersion}"
     compile "com.google.android.gms:play-services-location:${playServicesVersion}"
     compile "com.google.android.gms:play-services-maps:${playServicesVersion}"
+    compile 'com.google.maps.android:android-maps-utils:0.4.4'
     compile 'com.novoda:sqlite-provider:2.0.0'
     compile "com.github.hotchemi:permissionsdispatcher:${permissionsDispatcherVersion}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVersion}"

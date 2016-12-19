@@ -9,7 +9,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
@@ -20,16 +22,18 @@ import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.CursorUtils;
 import com.dnbitstudio.londoncycles.utils.Utils;
 
+import android.Manifest;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -43,7 +47,8 @@ import butterknife.ButterKnife;
 
 public class MapActivity extends BaseLocationActivity implements
         OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>,
+        ClusterManager.OnClusterItemClickListener<MapActivity.MyItem> {
 
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
@@ -57,6 +62,7 @@ public class MapActivity extends BaseLocationActivity implements
     private BitmapDescriptor mIconMarkerCurrent;
     private BitmapDescriptor mIconMarkerBikePoint;
     private boolean mMarkersInMap = false;
+    private ClusterManager<MyItem> mClusterManager;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -127,6 +133,7 @@ public class MapActivity extends BaseLocationActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnInfoWindowClickListener(this);
+        putMarkersInMap();
     }
 
     @Override
@@ -162,8 +169,6 @@ public class MapActivity extends BaseLocationActivity implements
     }
 
     private void handleNewLocation() {
-        setUpMap();
-
         if (mCameraPosition == null) {
             mCameraPosition = new CameraPosition.Builder()
                     .target(mLatLng)
@@ -171,15 +176,6 @@ public class MapActivity extends BaseLocationActivity implements
                     .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         }
-    }
-
-    private void setUpMap() {
-//        mMap.clear();
-//        MarkerOptions markerOptions = new MarkerOptions()
-//                .position(mLatLng)
-//                .icon(mIconMarkerCurrent);
-//        mMap.addMarker(markerOptions);
-//        putMarkersInMap();
     }
 
     private void loadIconMarkers() {
@@ -192,31 +188,38 @@ public class MapActivity extends BaseLocationActivity implements
     }
 
     private void putMarkersInMap() {
-        if (mMarkersInMap) {
+        if (mMarkersInMap || mMap == null || mBikePoints == null || mBikePoints.size() < 1) {
             return;
         }
 
-        Log.d(TAG, "init process markers");
-        List<MarkerOptions> markerOptionsList = new ArrayList<>();
-//        for (BikePoint bikepoint : mBikePoints) {
-//            LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
-//            MarkerOptions markerOptions = new MarkerOptions()
-//                    .position(latLong)
-//                    .title(bikepoint.getName())
-//                    .icon(mIconMarkerBikePoint);
-//            markerOptionsList.add(markerOptions);
-//            Marker marker = mMap.addMarker(markerOptions);
-//            marker.setTag(bikepoint.getId());
-//            marker.showInfoWindow();
-//        }
+        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+        mMap.setOnCameraIdleListener(mClusterManager);
 
-        new DisplayPinLocationsTask().execute();
+        for (BikePoint bikepoint : mBikePoints) {
+            MyItem offsetItem = new MyItem(bikepoint);
+            mClusterManager.addItem(offsetItem);
+        }
 
-//        if (markerOptionsList.size() > 0 ) {
-//            mMarkersInMap = true;
-//        }
-        Log.d(TAG, "finish process markers");
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mClusterManager.setRenderer(new OwnRendring(getApplicationContext(), mMap, mClusterManager));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+
+        mMap.getUiSettings().setRotateGesturesEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+
+        mMarkersInMap = true;
     }
+
+    @Override
+    public boolean onClusterItemClick(MyItem myItem) {
+        return false;
+    }
+
 
     private static class BikePointCursorLoader extends CursorLoader {
 
@@ -225,42 +228,38 @@ public class MapActivity extends BaseLocationActivity implements
         }
     }
 
-    class DisplayPinLocationsTask extends AsyncTask<Void, Void, Void> {
-        public DisplayPinLocationsTask() {
+    public class MyItem implements ClusterItem {
+        private final BikePoint mBikePoint;
+        private final LatLng mPosition;
+
+        public MyItem(BikePoint bikePoint) {
+            mPosition = new LatLng(bikePoint.getLat(), bikePoint.getLon());
+            mBikePoint = bikePoint;
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            for (final BikePoint bikepoint : mBikePoints) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LatLng latLong = new LatLng(bikepoint.getLat(), bikepoint.getLon());
-                        MarkerOptions markerOptions = new MarkerOptions()
-                                .position(latLong)
-                                .title(bikepoint.getName())
-                                .icon(mIconMarkerBikePoint);
-                        Marker marker = mMap.addMarker(markerOptions);
-                        marker.setTag(bikepoint.getId());
-//                        marker.showInfoWindow();
-                    }
-                });
+        public LatLng getPosition() {
+            return mPosition;
+        }
 
-                // Sleep so we let other UI actions happen in between the markers.
-                try {
-                    Thread.sleep(2);
-                } catch (InterruptedException e) {
-                    // Don't care
-                }
-            }
+        public BikePoint getBikePoint() {
+            return mBikePoint;
+        }
+    }
 
-            return null;
+    public class OwnRendring extends DefaultClusterRenderer<MyItem> {
+
+        public OwnRendring(Context context, GoogleMap map,
+                           ClusterManager<MyItem> clusterManager) {
+            super(context, map, clusterManager);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            mMarkersInMap = true;
+        protected void onClusterItemRendered(MyItem clusterItem, Marker marker) {
+            marker.setIcon(mIconMarkerCurrent);
+            marker.setTitle(clusterItem.getBikePoint().getName());
+            marker.setTag(clusterItem.getBikePoint().getId());
+            super.onClusterItemRendered(clusterItem, marker);
         }
     }
 }
