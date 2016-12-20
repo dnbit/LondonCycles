@@ -16,4 +16,5 @@
     <string name="empty_docks">Empty Docks</string>
     <string name="button_gps_alert_no">No</string>
     <string name="button_gps_alert_yes">Yes</string>
+    <string name="navigation_icon_description">Navigation icon</string>
 </resources>
