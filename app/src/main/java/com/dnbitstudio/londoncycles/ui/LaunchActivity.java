@@ -1,7 +1,7 @@
 package com.dnbitstudio.londoncycles.ui;
 
 import com.dnbitstudio.londoncycles.R;
-import com.dnbitstudio.londoncycles.ui.map.MapActivity;
+import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -46,7 +46,7 @@ public class LaunchActivity extends AppCompatActivity {
         mAccount = CreateSyncAccount(this);
         setupSync();
 
-        MapActivity.launchActivity(this);
+        BikePointListActivity.launchActivity(this);
         finish();
     }
 

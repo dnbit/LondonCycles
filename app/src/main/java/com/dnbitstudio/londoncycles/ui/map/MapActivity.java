@@ -48,8 +48,9 @@ import butterknife.ButterKnife;
 public class MapActivity extends BaseLocationActivity implements
         OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
         LoaderManager.LoaderCallbacks<Cursor>,
-        ClusterManager.OnClusterItemClickListener<MapActivity.MyItem> {
+        ClusterManager.OnClusterItemClickListener<MapActivity.CustomClusterItem> {
 
+    public static final int DEFAULT_ZOOM_LEVEL = 14;
     private static final String CAMERA_POSITION = "camera_position";
     private static final String MARKER_LAT_LONG = "marker_lat_long";
     private final String TAG = MapActivity.class.getSimpleName();
@@ -59,10 +60,9 @@ public class MapActivity extends BaseLocationActivity implements
     private CameraPosition mCameraPosition;
     private List<BikePoint> mBikePoints = new ArrayList<>();
     private LatLng mLatLng;
-    private BitmapDescriptor mIconMarkerCurrent;
     private BitmapDescriptor mIconMarkerBikePoint;
     private boolean mMarkersInMap = false;
-    private ClusterManager<MyItem> mClusterManager;
+    private ClusterManager<CustomClusterItem> mClusterManager;
 
     public static void launchActivity(Context context) {
         Intent intent = new Intent(context, MapActivity.class);
@@ -90,7 +90,7 @@ public class MapActivity extends BaseLocationActivity implements
 
         getLoaderManager().initLoader(0, null, this);
 
-        loadIconMarkers();
+        loadMarkersIcon();
     }
 
     @Override
@@ -172,18 +172,15 @@ public class MapActivity extends BaseLocationActivity implements
         if (mCameraPosition == null) {
             mCameraPosition = new CameraPosition.Builder()
                     .target(mLatLng)
-                    .zoom(15)
+                    .zoom(DEFAULT_ZOOM_LEVEL)
                     .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         }
     }
 
-    private void loadIconMarkers() {
+    private void loadMarkersIcon() {
         Bitmap iconBitmap = Utils
                 .getBitmapFromVectorDrawable(this, R.drawable.ic_current_position_map_marker);
-        mIconMarkerCurrent = BitmapDescriptorFactory.fromBitmap(iconBitmap);
-
-        iconBitmap = Utils.getBitmapFromVectorDrawable(this, R.drawable.ic_bikepoint_map_marker);
         mIconMarkerBikePoint = BitmapDescriptorFactory.fromBitmap(iconBitmap);
     }
 
@@ -192,18 +189,24 @@ public class MapActivity extends BaseLocationActivity implements
             return;
         }
 
-        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+        mClusterManager = new ClusterManager<>(this, mMap);
         mMap.setOnCameraIdleListener(mClusterManager);
 
         for (BikePoint bikepoint : mBikePoints) {
-            MyItem offsetItem = new MyItem(bikepoint);
-            mClusterManager.addItem(offsetItem);
+            CustomClusterItem clusterItem = new CustomClusterItem(bikepoint);
+            mClusterManager.addItem(clusterItem);
         }
 
         mMap.setOnMarkerClickListener(mClusterManager);
-        mClusterManager.setRenderer(new OwnRendring(getApplicationContext(), mMap, mClusterManager));
+        mClusterManager.setRenderer(
+                new CustomClusterRenderer(getApplicationContext(), mMap, mClusterManager));
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         }
 
@@ -216,10 +219,9 @@ public class MapActivity extends BaseLocationActivity implements
     }
 
     @Override
-    public boolean onClusterItemClick(MyItem myItem) {
+    public boolean onClusterItemClick(CustomClusterItem customClusterItem) {
         return false;
     }
-
 
     private static class BikePointCursorLoader extends CursorLoader {
 
@@ -228,11 +230,12 @@ public class MapActivity extends BaseLocationActivity implements
         }
     }
 
-    public class MyItem implements ClusterItem {
+    public class CustomClusterItem implements ClusterItem {
+
         private final BikePoint mBikePoint;
         private final LatLng mPosition;
 
-        public MyItem(BikePoint bikePoint) {
+        public CustomClusterItem(BikePoint bikePoint) {
             mPosition = new LatLng(bikePoint.getLat(), bikePoint.getLon());
             mBikePoint = bikePoint;
         }
@@ -247,16 +250,16 @@ public class MapActivity extends BaseLocationActivity implements
         }
     }
 
-    public class OwnRendring extends DefaultClusterRenderer<MyItem> {
+    public class CustomClusterRenderer extends DefaultClusterRenderer<CustomClusterItem> {
 
-        public OwnRendring(Context context, GoogleMap map,
-                           ClusterManager<MyItem> clusterManager) {
+        public CustomClusterRenderer(Context context, GoogleMap map,
+                                     ClusterManager<CustomClusterItem> clusterManager) {
             super(context, map, clusterManager);
         }
 
         @Override
-        protected void onClusterItemRendered(MyItem clusterItem, Marker marker) {
-            marker.setIcon(mIconMarkerCurrent);
+        protected void onClusterItemRendered(CustomClusterItem clusterItem, Marker marker) {
+            marker.setIcon(mIconMarkerBikePoint);
             marker.setTitle(clusterItem.getBikePoint().getName());
             marker.setTag(clusterItem.getBikePoint().getId());
             super.onClusterItemRendered(clusterItem, marker);
