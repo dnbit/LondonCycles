@@ -7,11 +7,14 @@ import com.dnbitstudio.londoncycles.utils.Utils;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.MenuItem;
 
+import butterknife.BindBool;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -26,6 +29,10 @@ public class BikePointDetailActivity extends AppCompatActivity {
 
     private final String TAG = BikePointDetailActivity.class.getSimpleName();
 
+    @BindBool(R.bool.rtl)
+    boolean mRtl;
+    @BindView(R.id.toolbar_layout)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
     @BindView(R.id.detail_toolbar)
     Toolbar mToolbar;
     private BikePointDetailFragment mFragment;
@@ -49,6 +56,12 @@ public class BikePointDetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        if (mRtl) {
+            mCollapsingToolbarLayout.setExpandedTitleGravity(Gravity.END | Gravity.BOTTOM);
+            mCollapsingToolbarLayout
+                    .setCollapsedTitleGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         }
 
         // savedInstanceState is non-null when there is fragment state

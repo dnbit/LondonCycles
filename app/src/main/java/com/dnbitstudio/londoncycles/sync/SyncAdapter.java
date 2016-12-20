@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
-import com.dnbitstudio.londoncycles.model.TflService;
+import com.dnbitstudio.londoncycles.network.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.utils.LocationDistanceComparator;
@@ -47,6 +47,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String BIKE_POINT_PARSE_ADDITIONAL_PROPERTIES = "additionalProperties";
     private static final String BIKE_POINT_PARSE_KEY = "key";
     private static final String BIKE_POINT_PARSE_VALUE = "value";
+    private static final String ADDITIONAL_PROPERTIES_BIKES_PARSE_KEY = "NbBikes";
+    private static final String ADDITIONAL_PROPERTIES_DOCKS_PARSE_KEY = "NbDocks";
+    private static final String ADDITIONAL_PROPERTIES_EMPTY_PARSE_KEY = "NbEmptyDocks";
     private final String TAG = SyncAdapter.class.getSimpleName();
     // Global variables
     // Define a variable to contain a content resolver instance
@@ -138,15 +141,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             String key = additionalPropertyJsonObject.get(BIKE_POINT_PARSE_KEY).getAsString();
             switch (key) {
-                case "NbBikes":
+                case ADDITIONAL_PROPERTIES_BIKES_PARSE_KEY:
                     mBikePoint.setBikes(
                             additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
                     break;
-                case "NbDocks":
+                case ADDITIONAL_PROPERTIES_DOCKS_PARSE_KEY:
                     mBikePoint.setDocks(
                             additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
                     break;
-                case "NbEmptyDocks":
+                case ADDITIONAL_PROPERTIES_EMPTY_PARSE_KEY:
                     mBikePoint.setEmpty(
                             additionalPropertyJsonObject.get(BIKE_POINT_PARSE_VALUE).getAsInt());
                     break;

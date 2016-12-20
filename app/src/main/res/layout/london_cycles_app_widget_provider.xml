@@ -4,7 +4,7 @@
         android:id="@+id/widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#09C">
+        android:background="@color/colorPrimary">
 
     <TextView
             android:id="@+id/appwidget_name"
@@ -15,8 +15,7 @@
             android:textColor="#ffffff"
             android:textSize="14sp"
             android:textStyle="bold|italic"
-            android:layout_margin="8dp"
-            android:background="#09C"/>
+            android:layout_margin="8dp"/>
 
     <TextView
             android:id="@+id/appwidget_bikes_label"
@@ -29,8 +28,7 @@
             android:textColor="#ffffff"
             android:textSize="12sp"
             android:textStyle="bold|italic"
-            android:layout_margin="8dp"
-            android:background="#09C"/>
+            android:layout_margin="8dp"/>
 
     <TextView
             android:id="@+id/appwidget_bikes"
@@ -43,7 +41,6 @@
             android:textSize="12sp"
             android:textStyle="bold|italic"
             android:layout_margin="8dp"
-            android:background="#09C"
             tools:text="16"/>
 
     <TextView
@@ -57,7 +54,6 @@
             android:textSize="12sp"
             android:textStyle="bold|italic"
             android:layout_margin="8dp"
-            android:background="#09C"
             tools:text="5"/>
 
     <TextView
@@ -71,7 +67,6 @@
             android:textColor="#ffffff"
             android:textSize="12sp"
             android:textStyle="bold|italic"
-            android:layout_margin="8dp"
-            android:background="#09C"/>
+            android:layout_margin="8dp"/>
 
 </RelativeLayout>

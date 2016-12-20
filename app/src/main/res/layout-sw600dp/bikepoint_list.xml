@@ -21,11 +21,12 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/bikepoint_list"
-            android:name="com.dnbitstudio.londoncycles.ui.list.BikePointListFragment"
             android:layout_width="@dimen/item_width"
             android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
+            android:name="com.dnbitstudio.londoncycles.ui.list.BikePointListFragment"
             tools:context="com.dnbitstudio.londoncycles.ui.list.BikePointListActivity"
             tools:listitem="@layout/bikepoint_list_content"/>
 
@@ -43,6 +44,7 @@
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="@string/navigation_icon_description"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"

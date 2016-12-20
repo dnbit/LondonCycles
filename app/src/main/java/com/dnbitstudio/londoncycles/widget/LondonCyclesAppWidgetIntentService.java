@@ -12,7 +12,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -21,8 +20,9 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
         implements Loader.OnLoadCompleteListener<Cursor> {
 
     public static final int CURSOR_LOADER_LISTENER_ID = 1;
+    public static final int WAIT_MILLIS = 1000;
     private final String TAG = LondonCyclesAppWidgetIntentService.class.getSimpleName();
-    private BikePointCursorLoader mCursorLoader;
+    private BikePointProvider.ClosestBikePointCursorLoader mCursorLoader;
     private boolean mWaiting;
 
     public LondonCyclesAppWidgetIntentService() {
@@ -37,7 +37,7 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
-        mCursorLoader = new BikePointCursorLoader(this);
+        mCursorLoader = new BikePointProvider.ClosestBikePointCursorLoader(this);
         mCursorLoader.registerListener(CURSOR_LOADER_LISTENER_ID, this);
         mCursorLoader.startLoading();
         super.onCreate();
@@ -50,7 +50,7 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
         mWaiting = true;
         while (mWaiting) {
             try {
-                Thread.currentThread().sleep(1000);
+                Thread.currentThread().sleep(WAIT_MILLIS);
             } catch (InterruptedException e) {
                 Log.d(TAG, e.getMessage());
             }
@@ -118,12 +118,5 @@ public class LondonCyclesAppWidgetIntentService extends IntentService
         }
 
         mWaiting = false;
-    }
-
-    private static class BikePointCursorLoader extends CursorLoader {
-
-        public BikePointCursorLoader(Context context) {
-            super(context, BikePointProvider.CLOSEST_BIKE_POINT, null, null, null, null);
-        }
     }
 }

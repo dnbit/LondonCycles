@@ -1,5 +1,9 @@
 package com.dnbitstudio.londoncycles.utils;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
+import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 
 import android.content.Context;
@@ -14,6 +18,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatDrawableManager;
@@ -46,13 +51,13 @@ public class Utils {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.button_gps_alert_yes, new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                        context.startActivity(new Intent(android.provider.
+                        context.startActivity(new Intent(
                                 Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
                 })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.button_gps_alert_no, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         dialog.cancel();
                     }
@@ -91,7 +96,7 @@ public class Utils {
         editor.apply();
     }
 
-    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+    private static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, drawableId);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             drawable = (DrawableCompat.wrap(drawable)).mutate();
@@ -109,5 +114,11 @@ public class Utils {
     public static Intent generateNavigationIntent(double lat, double lon) {
         String uriString = "http://maps.google.com/maps?daddr=" + lat + "," + lon;
         return new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
+    }
+
+    public static BitmapDescriptor loadMarkerIcon(Context context) {
+        Bitmap iconBitmap = Utils
+                .getBitmapFromVectorDrawable(context, R.drawable.ic_current_position_map_marker);
+        return BitmapDescriptorFactory.fromBitmap(iconBitmap);
     }
 }

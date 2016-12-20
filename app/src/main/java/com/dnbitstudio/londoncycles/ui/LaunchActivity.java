@@ -14,7 +14,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     // Constants
     // The account name
-    public static final String ACCOUNT = "dummyaccount";
+    public static final String ACCOUNT = "defaultaccount";
     private static String mAccountType;
     // Instance fields
     Account mAccount;

@@ -5,7 +5,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -25,12 +24,10 @@ import com.dnbitstudio.londoncycles.utils.Utils;
 import android.Manifest;
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -60,7 +57,7 @@ public class MapActivity extends BaseLocationActivity implements
     private CameraPosition mCameraPosition;
     private List<BikePoint> mBikePoints = new ArrayList<>();
     private LatLng mLatLng;
-    private BitmapDescriptor mIconMarkerBikePoint;
+    private BitmapDescriptor mMarkerIcon;
     private boolean mMarkersInMap = false;
     private ClusterManager<CustomClusterItem> mClusterManager;
 
@@ -90,7 +87,7 @@ public class MapActivity extends BaseLocationActivity implements
 
         getLoaderManager().initLoader(0, null, this);
 
-        loadMarkersIcon();
+        setupMarkerIcon();
     }
 
     @Override
@@ -151,7 +148,7 @@ public class MapActivity extends BaseLocationActivity implements
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG, "onCreateLoader");
-        return new BikePointCursorLoader(this);
+        return new BikePointProvider.AllBikePointCursorLoader(this);
     }
 
     @Override
@@ -168,6 +165,10 @@ public class MapActivity extends BaseLocationActivity implements
         Log.d(TAG, "onLoaderReset");
     }
 
+    private void setupMarkerIcon() {
+        mMarkerIcon = Utils.loadMarkerIcon(this);
+    }
+
     private void handleNewLocation() {
         if (mCameraPosition == null) {
             mCameraPosition = new CameraPosition.Builder()
@@ -176,12 +177,6 @@ public class MapActivity extends BaseLocationActivity implements
                     .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
         }
-    }
-
-    private void loadMarkersIcon() {
-        Bitmap iconBitmap = Utils
-                .getBitmapFromVectorDrawable(this, R.drawable.ic_current_position_map_marker);
-        mIconMarkerBikePoint = BitmapDescriptorFactory.fromBitmap(iconBitmap);
     }
 
     private void putMarkersInMap() {
@@ -223,13 +218,6 @@ public class MapActivity extends BaseLocationActivity implements
         return false;
     }
 
-    private static class BikePointCursorLoader extends CursorLoader {
-
-        public BikePointCursorLoader(Context context) {
-            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
-        }
-    }
-
     public class CustomClusterItem implements ClusterItem {
 
         private final BikePoint mBikePoint;
@@ -259,7 +247,7 @@ public class MapActivity extends BaseLocationActivity implements
 
         @Override
         protected void onClusterItemRendered(CustomClusterItem clusterItem, Marker marker) {
-            marker.setIcon(mIconMarkerBikePoint);
+            marker.setIcon(mMarkerIcon);
             marker.setTitle(clusterItem.getBikePoint().getName());
             marker.setTag(clusterItem.getBikePoint().getId());
             super.onClusterItemRendered(clusterItem, marker);

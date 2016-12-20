@@ -10,7 +10,6 @@ import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -38,10 +37,7 @@ public class BikePointListActivity extends BaseLocationActivity
      */
     private static final String[] FROM_COLUMNS = new String[]{
             BikePointProvider.COL_BIKE_POINT_ID,
-            BikePointProvider.COL_BIKE_POINT_NAME,
-            BikePointProvider.COL_BIKE_POINT_DOCKS,
-            BikePointProvider.COL_BIKE_POINT_BIKES,
-            BikePointProvider.COL_BIKE_POINT_EMPTY
+            BikePointProvider.COL_BIKE_POINT_NAME
     };
 
     /**
@@ -49,10 +45,7 @@ public class BikePointListActivity extends BaseLocationActivity
      */
     private static final int[] TO_FIELDS = new int[]{
             R.id.id,
-            R.id.name,
-            R.id.docks,
-            R.id.bikes,
-            R.id.empty};
+            R.id.name};
 
     private static final String FAB_VISIBILITY = "fab_visibility";
     private final String TAG = BikePointListActivity.class.getSimpleName();
@@ -128,7 +121,7 @@ public class BikePointListActivity extends BaseLocationActivity
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "onCreateLoader");
-        return new BikePointCursorLoader(this);
+        return new BikePointProvider.AllBikePointCursorLoader(this);
     }
 
     @Override
@@ -147,7 +140,6 @@ public class BikePointListActivity extends BaseLocationActivity
 
     private void setupListView() {
         mListView.setAdapter(mAdapter);
-//        setEmptyText(getText(R.string.loading));
         getLoaderManager().initLoader(0, null, this);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -196,13 +188,6 @@ public class BikePointListActivity extends BaseLocationActivity
             if (mIsFabVisible) {
                 mFab.setVisibility(View.VISIBLE);
             }
-        }
-    }
-
-    private static class BikePointCursorLoader extends CursorLoader {
-
-        public BikePointCursorLoader(Context context) {
-            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
         }
     }
 }

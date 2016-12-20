@@ -6,7 +6,6 @@
     <string name="title_bikepoint_detail">Station Detail</string>
     <string name="map">Map</string>
     <string name="list">List</string>
-    <string name="explain_demo">See the device LogCat for the output of this demo</string>
     <string name="account_type" translatable="false">dnbitstudio.com</string>
     <string name="content_authority">com.dnbitstudio.londoncycles.android.datasync.provider</string>
     <string name="appwidget_name">Loading</string>
@@ -15,4 +14,7 @@
     <string name="empty">Empty</string>
     <string name="available_bikes">Available Bikes</string>
     <string name="empty_docks">Empty Docks</string>
+    <string name="button_gps_alert_no">No</string>
+    <string name="button_gps_alert_yes">Yes</string>
+    <string name="navigation_icon_description">Navigation icon</string>
 </resources>
