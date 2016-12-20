@@ -38,10 +38,7 @@ public class BikePointListActivity extends BaseLocationActivity
      */
     private static final String[] FROM_COLUMNS = new String[]{
             BikePointProvider.COL_BIKE_POINT_ID,
-            BikePointProvider.COL_BIKE_POINT_NAME,
-            BikePointProvider.COL_BIKE_POINT_DOCKS,
-            BikePointProvider.COL_BIKE_POINT_BIKES,
-            BikePointProvider.COL_BIKE_POINT_EMPTY
+            BikePointProvider.COL_BIKE_POINT_NAME
     };
 
     /**
@@ -49,10 +46,7 @@ public class BikePointListActivity extends BaseLocationActivity
      */
     private static final int[] TO_FIELDS = new int[]{
             R.id.id,
-            R.id.name,
-            R.id.docks,
-            R.id.bikes,
-            R.id.empty};
+            R.id.name};
 
     private static final String FAB_VISIBILITY = "fab_visibility";
     private final String TAG = BikePointListActivity.class.getSimpleName();

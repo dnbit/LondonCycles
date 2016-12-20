@@ -47,6 +47,7 @@ public class BikePointDetailFragment extends Fragment
      * represents.
      */
     public static final String ARG_ITEM_ID = "item_id";
+    public static final int DEFAULT_ZOOM_LEVEL = 15;
     private final String TAG = BikePointDetailFragment.class.getSimpleName();
     public BikePoint mBikePoint;
     @BindView(R.id.detail_name)
@@ -129,7 +130,7 @@ public class BikePointDetailFragment extends Fragment
             LatLng latLng = new LatLng(mBikePoint.getLat(), mBikePoint.getLon());
             mCameraPosition = new CameraPosition.Builder()
                     .target(latLng)
-                    .zoom(15)
+                    .zoom(DEFAULT_ZOOM_LEVEL)
                     .build();
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
 
