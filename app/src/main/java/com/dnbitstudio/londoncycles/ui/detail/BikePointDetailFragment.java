@@ -5,6 +5,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -14,11 +15,10 @@ import com.dnbitstudio.londoncycles.model.BikePoint;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.list.BikePointListActivity;
 import com.dnbitstudio.londoncycles.utils.CursorUtils;
+import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -61,6 +61,7 @@ public class BikePointDetailFragment extends Fragment
     private GoogleMap mMap;
     private String mId;
     private CameraPosition mCameraPosition;
+    private BitmapDescriptor mMarkerIcon;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -87,6 +88,8 @@ public class BikePointDetailFragment extends Fragment
 
         mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
+
+        setupMarkerIcon();
 
         return rootView;
     }
@@ -136,6 +139,7 @@ public class BikePointDetailFragment extends Fragment
 
             mMap.clear();
             MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+            markerOptions.icon(mMarkerIcon);
             mMap.addMarker(markerOptions);
         }
     }
@@ -143,7 +147,7 @@ public class BikePointDetailFragment extends Fragment
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(TAG, "onCreateLoader");
-        return new BikePointCursorLoader(getActivity(), mId);
+        return new BikePointProvider.IdBikePointCursorLoader(getActivity(), mId);
     }
 
     @Override
@@ -170,11 +174,7 @@ public class BikePointDetailFragment extends Fragment
         }
     }
 
-    private static class BikePointCursorLoader extends CursorLoader {
-
-        public BikePointCursorLoader(Context context, String id) {
-            super(context, BikePointProvider.BIKE_POINTS, null,
-                    BikePointProvider.COL_BIKE_POINT_ID + " = '" + id + "'", null, null);
-        }
+    private void setupMarkerIcon() {
+        mMarkerIcon = Utils.loadMarkerIcon(getActivity().getApplicationContext());
     }
 }

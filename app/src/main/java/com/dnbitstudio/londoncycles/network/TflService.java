@@ -1,9 +1,8 @@
-package com.dnbitstudio.londoncycles.model;
+package com.dnbitstudio.londoncycles.network;
 
 import com.google.gson.JsonArray;
 
 import com.dnbitstudio.londoncycles.BuildConfig;
-import com.dnbitstudio.londoncycles.network.TflApi;
 
 import java.io.IOException;
 

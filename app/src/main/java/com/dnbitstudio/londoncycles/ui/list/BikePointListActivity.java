@@ -10,7 +10,6 @@ import com.dnbitstudio.londoncycles.utils.Utils;
 
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -122,7 +121,7 @@ public class BikePointListActivity extends BaseLocationActivity
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "onCreateLoader");
-        return new BikePointCursorLoader(this);
+        return new BikePointProvider.AllBikePointCursorLoader(this);
     }
 
     @Override
@@ -141,7 +140,6 @@ public class BikePointListActivity extends BaseLocationActivity
 
     private void setupListView() {
         mListView.setAdapter(mAdapter);
-//        setEmptyText(getText(R.string.loading));
         getLoaderManager().initLoader(0, null, this);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -190,13 +188,6 @@ public class BikePointListActivity extends BaseLocationActivity
             if (mIsFabVisible) {
                 mFab.setVisibility(View.VISIBLE);
             }
-        }
-    }
-
-    private static class BikePointCursorLoader extends CursorLoader {
-
-        public BikePointCursorLoader(Context context) {
-            super(context, BikePointProvider.BIKE_POINTS, null, null, null, null);
         }
     }
 }

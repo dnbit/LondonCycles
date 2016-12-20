@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.model.BikePoint;
-import com.dnbitstudio.londoncycles.model.TflService;
+import com.dnbitstudio.londoncycles.network.TflService;
 import com.dnbitstudio.londoncycles.provider.BikePointProvider;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 import com.dnbitstudio.londoncycles.utils.LocationDistanceComparator;

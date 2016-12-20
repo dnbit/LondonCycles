@@ -1,5 +1,8 @@
 package com.dnbitstudio.londoncycles.utils;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
 import com.dnbitstudio.londoncycles.R;
 import com.dnbitstudio.londoncycles.ui.BaseLocationActivity;
 
@@ -93,7 +96,7 @@ public class Utils {
         editor.apply();
     }
 
-    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+    private static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, drawableId);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             drawable = (DrawableCompat.wrap(drawable)).mutate();
@@ -111,5 +114,11 @@ public class Utils {
     public static Intent generateNavigationIntent(double lat, double lon) {
         String uriString = "http://maps.google.com/maps?daddr=" + lat + "," + lon;
         return new Intent(Intent.ACTION_VIEW, Uri.parse(uriString));
+    }
+
+    public static BitmapDescriptor loadMarkerIcon(Context context) {
+        Bitmap iconBitmap = Utils
+                .getBitmapFromVectorDrawable(context, R.drawable.ic_current_position_map_marker);
+        return BitmapDescriptorFactory.fromBitmap(iconBitmap);
     }
 }
